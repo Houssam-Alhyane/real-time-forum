@@ -1,0 +1,129 @@
+/* ==========================================================================
+   1. Reset & Global Styles
+   ========================================================================== */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+  background-color: #f4f7f6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  color: #333;
+}
+
+main {
+  width: 100%;
+  max-width: 420px;
+  padding: 20px;
+}
+
+/* ==========================================================================
+   2. Card Container (#app)
+   ========================================================================== */
+#app {
+  background: #ffffff;
+  padding: 40px 30px;
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s ease;
+}
+
+/* Heading */
+#app h2 {
+  margin-bottom: 24px;
+  font-size: 28px;
+  font-weight: 600;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+/* ==========================================================================
+   3. Form Elements (Inputs & Selects)
+   ========================================================================== */
+#app input,
+#app select {
+  width: 100%;
+  padding: 12px 16px;
+  margin-bottom: 16px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  font-size: 14px;
+  background-color: #f9f9f9;
+  outline: none;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+/* Focus states */
+#app input:focus,
+#app select:focus {
+  border-color: #4a90e2;
+  background-color: #fff;
+  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
+}
+
+/* Chrome/Safari/Edge specific tweak for number input */
+
+#app input Khud::-webkit-outer-spin-button,
+#app input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+/* ==========================================================================
+   4. Buttons
+   ========================================================================== */
+#app button {
+  width: 100%;
+  padding: 14px;
+  background-color: #4a90e2;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  cursor: pointer;
+  margin-top: 8px;
+  margin-bottom: 20px;
+  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+
+#app button:hover {
+  background-color: #357abd;
+}
+
+#app button:active {
+  transform: scale(0.98);
+}
+
+/* ==========================================================================
+   5. Navigation Links (Toggle View)
+   ========================================================================== */
+#app p {
+  text-align: center;
+  font-size: 14px;
+  color: #666;
+  cursor: pointer;
+  user-select: none;
+  transition: color 0.2s ease;
+}
+
+#app p:hover {
+  color: #4a90e2;
+  text-decoration: underline;
+}
+
+/* ==========================================================================
+   6. Loading State & Server Feedback
+   ========================================================================== */
+/* Generic container fallback for text-based responses from server */
+#app div {
+  text-align: center;
+  font-size: 16px;
+  color: #888;
+}
