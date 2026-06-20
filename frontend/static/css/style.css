@@ -1,129 +1,545 @@
-/* ==========================================================================
-   1. Reset & Global Styles
-   ========================================================================== */
+/* =========================================================
+   REAL-TIME FORUM — dark theme
+   "Night wire" concept: a forum feed reads like a dispatch
+   board, the chat sidebar reads like a live ticker.
+   Serif headlines + mono metadata + clean sans body.
+   ========================================================= */
+
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+:root {
+  /* surfaces */
+  --bg: #14161b;
+  --bg-elevated: #1b1e25;
+  --bg-inset: #0f1115;
+  --border: #2a2e38;
+  --border-strong: #3a3f4c;
+
+  /* text */
+  --text: #e9e6df;
+  --text-muted: #9298a6;
+  --text-faint: #5e6573;
+
+  /* accents */
+  --accent: #e3a23d; /* amber — primary / CTAs / posts */
+  --accent-strong: #f0b554;
+  --accent-soft-bg: #2c2415;
+  --link: #5fb3ad; /* teal — secondary / chat */
+  --link-soft-bg: #16292a;
+  --online: #6fb56a;
+  --danger: #e16a64;
+  --danger-bg: #2c1818;
+  --success: #7cc274;
+  --success-bg: #182a18;
+
+  /* type */
+  --font-display: 'Fraunces', Georgia, serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+
+  --radius: 8px;
+  --radius-sm: 4px;
+}
+
+/* ---------------- Reset & base ---------------- */
 * {
   box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
   margin: 0;
-  padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-  background-color: #f4f7f6;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-  color: #333;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
 }
 
 main {
-  width: 100%;
-  max-width: 420px;
-  padding: 20px;
+  display: block;
+  min-height: 100vh;
 }
 
-/* ==========================================================================
-   2. Card Container (#app)
-   ========================================================================== */
 #app {
-  background: #ffffff;
-  padding: 40px 30px;
-  border-radius: 12px;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 40px 24px 64px;
 }
 
-/* Heading */
-#app h2 {
-  margin-bottom: 24px;
-  font-size: 28px;
+h2 {
+  font-family: var(--font-display);
   font-weight: 600;
-  color: #1a1a1a;
-  text-align: center;
+  font-size: 1.6rem;
+  letter-spacing: 0.01em;
+  color: var(--text);
+  margin: 0 0 18px;
 }
 
-/* ==========================================================================
-   3. Form Elements (Inputs & Selects)
-   ========================================================================== */
-#app input,
-#app select {
-  width: 100%;
-  padding: 12px 16px;
-  margin-bottom: 16px;
-  border: 1px solid #e0e0e0;
-  border-radius: 8px;
-  font-size: 14px;
-  background-color: #f9f9f9;
-  outline: none;
-  transition: border-color 0.2s ease, background-color 0.2s ease;
-}
-
-/* Focus states */
-#app input:focus,
-#app select:focus {
-  border-color: #4a90e2;
-  background-color: #fff;
-  box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.15);
-}
-
-/* Chrome/Safari/Edge specific tweak for number input */
-
-#app input Khud::-webkit-outer-spin-button,
-#app input::-webkit-inner-spin-button {
-  -webkit-appearance: none;
+p {
   margin: 0;
 }
 
-/* ==========================================================================
-   4. Buttons
-   ========================================================================== */
-#app button {
-  width: 100%;
-  padding: 14px;
-  background-color: #4a90e2;
-  color: white;
-  border: none;
+input,
+select,
+button,
+textarea {
+  font-family: inherit;
+  font-size: 0.95rem;
+}
+
+a,
+.link-back,
+.auth-switch,
+.logout-link {
+  cursor: pointer;
+}
+
+::selection {
+  background: var(--accent-soft-bg);
+  color: var(--accent-strong);
+}
+
+/* dark scrollbars */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) var(--bg-elevated);
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-track {
+  background: var(--bg-elevated);
+}
+*::-webkit-scrollbar-thumb {
+  background: var(--border-strong);
   border-radius: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  cursor: pointer;
-  margin-top: 8px;
-  margin-bottom: 20px;
-  transition: background-color 0.2s ease, transform 0.1s ease;
+}
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--text-faint);
 }
 
-#app button:hover {
-  background-color: #357abd;
+/* visible keyboard focus everywhere */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+[onclick]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
-#app button:active {
-  transform: scale(0.98);
+/* ---------------- Form feedback banner ---------------- */
+#form-message {
+  font-size: 0.88rem;
+  font-family: var(--font-mono);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  margin: -4px 0 16px;
+  border: 1px solid transparent;
 }
 
-/* ==========================================================================
-   5. Navigation Links (Toggle View)
-   ========================================================================== */
-#app p {
+#form-message.is-error {
+  background: var(--danger-bg);
+  border-color: #4a2424;
+  color: var(--danger);
+}
+
+#form-message.is-success {
+  background: var(--success-bg);
+  border-color: #234023;
+  color: var(--success);
+}
+
+/* ---------------- 404 ---------------- */
+.not-found {
   text-align: center;
-  font-size: 14px;
-  color: #666;
-  cursor: pointer;
-  user-select: none;
-  transition: color 0.2s ease;
+  padding: 80px 20px;
+  color: var(--text-muted);
 }
 
-#app p:hover {
-  color: #4a90e2;
+.not-found h2 {
+  font-size: 2rem;
+}
+
+.not-found .link-back {
+  color: var(--link);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  margin-top: 10px;
+}
+
+.not-found .link-back:hover {
   text-decoration: underline;
 }
 
-/* ==========================================================================
-   6. Loading State & Server Feedback
-   ========================================================================== */
-/* Generic container fallback for text-based responses from server */
-#app div {
+/* ---------------- Buttons (global) ---------------- */
+button {
+  background: var(--accent);
+  color: #1a1305;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 10px 18px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.1s ease;
+}
+
+button:hover {
+  background: var(--accent-strong);
+}
+
+button:active {
+  transform: translateY(1px);
+}
+
+/* ---------------- Inputs (global) ---------------- */
+input,
+select {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  color: var(--text);
+  border-radius: var(--radius-sm);
+  padding: 11px 13px;
+  width: 100%;
+  transition: border-color 0.15s ease;
+}
+
+input::placeholder {
+  color: var(--text-faint);
+}
+
+input:focus,
+select:focus {
+  border-color: var(--accent);
+}
+
+select {
+  appearance: none;
+  background-image: linear-gradient(
+      45deg,
+      transparent 50%,
+      var(--text-muted) 50%
+    ),
+    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
+  background-position: calc(100% - 18px) center, calc(100% - 13px) center;
+  background-size: 5px 5px, 5px 5px;
+  background-repeat: no-repeat;
+}
+
+select option {
+  background: var(--bg-inset);
+  color: var(--text);
+}
+
+/* ---------------- Auth shell (login / register) ---------------- */
+.auth-shell {
+  max-width: 420px;
+  margin: 40px auto 0;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--accent);
+  border-radius: var(--radius);
+  padding: 36px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.auth-shell h2 {
   text-align: center;
-  font-size: 16px;
-  color: #888;
+  margin-bottom: 6px;
+}
+
+.auth-shell h2::after {
+  content: '';
+  display: block;
+  width: 36px;
+  height: 2px;
+  background: var(--accent);
+  margin: 12px auto 0;
+}
+
+.auth-shell button {
+  margin-top: 8px;
+}
+
+.auth-switch {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--link);
+  margin-top: 4px;
+}
+
+.auth-switch:hover {
+  text-decoration: underline;
+}
+
+/* ---------------- Home layout ---------------- */
+.zone-home {
+  display: grid;
+  grid-template-columns: 1fr 320px;
+  gap: 28px;
+  align-items: start;
+}
+
+/* ---------------- Posts feed ---------------- */
+#posts-section {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+#posts-container {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+
+/* Forward-looking classes for when posts are rendered by loadPosts() */
+.post-card {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 16px 18px;
+}
+
+.post-card .post-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0 0 6px;
+}
+
+.post-card .post-meta {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.post-card .post-category {
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.post-card .post-body {
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+}
+
+.comment {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  margin-top: 10px;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--text-muted);
+}
+
+.comment .comment-author {
+  color: var(--link);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  margin-right: 8px;
+}
+
+/* ---------------- Chat sidebar ---------------- */
+#chat-sidebar {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-top: 3px solid var(--link);
+  border-radius: var(--radius);
+  padding: 22px;
+  position: sticky;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 48px);
+}
+
+#users-list {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  overflow-y: auto;
+  max-height: 220px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid var(--border);
+  padding-bottom: 12px;
+}
+
+/* Forward-looking classes for the online users list */
+.user-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 6px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+}
+
+.user-item:hover {
+  background: var(--bg-inset);
+}
+
+.user-item.active {
+  background: var(--link-soft-bg);
+  color: var(--text);
+}
+
+.user-item .status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--text-faint);
+  flex-shrink: 0;
+}
+
+.user-item.online .status-dot {
+  background: var(--online);
+  box-shadow: 0 0 0 3px rgba(111, 181, 106, 0.15);
+}
+
+.user-item .last-message {
+  color: var(--text-faint);
+  font-size: 0.78rem;
+  margin-left: auto;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 90px;
+}
+
+#private-messages-box {
+  flex: 1;
+  overflow-y: auto;
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  color: var(--text-faint);
+  padding: 4px 2px;
+  margin-bottom: 12px;
+}
+
+/* Forward-looking classes for message bubbles */
+.message {
+  margin-bottom: 10px;
+  max-width: 85%;
+}
+
+.message .message-meta {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  color: var(--text-faint);
+  margin-bottom: 2px;
+}
+
+.message .message-author {
+  color: var(--link);
+}
+
+.message .message-text {
+  background: var(--bg-inset);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 8px 11px;
+  color: var(--text);
+}
+
+.message.is-mine {
+  margin-left: auto;
+}
+
+.message.is-mine .message-text {
+  background: var(--accent-soft-bg);
+  border-color: #4a3a1c;
+}
+
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+}
+
+.chat-input-row input {
+  flex: 1;
+}
+
+.chat-input-row button {
+  background: var(--link);
+  color: #06201d;
+  flex-shrink: 0;
+}
+
+.chat-input-row button:hover {
+  background: #74c4be;
+}
+
+.logout-link {
+  text-align: center;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--text-faint);
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid var(--border);
+}
+
+.logout-link:hover {
+  color: var(--danger);
+}
+
+/* "Join the conversation" logged-out state inside #chat-sidebar */
+#chat-sidebar .auth-switch {
+  margin-top: 10px;
+}
+
+/* ---------------- Responsive ---------------- */
+@media (max-width: 860px) {
+  .zone-home {
+    grid-template-columns: 1fr;
+  }
+
+  #chat-sidebar {
+    position: static;
+    max-height: none;
+  }
+
+  #users-list {
+    max-height: 160px;
+  }
+
+  #app {
+    padding: 24px 16px 48px;
+  }
+
+  .auth-shell {
+    margin-top: 16px;
+    padding: 28px 22px;
+  }
+}
+
+/* ---------------- Reduced motion ---------------- */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    animation: none !important;
+  }
 }
