@@ -72,15 +72,12 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// The actual credential: HttpOnly so JS can never read or
-		// forge it. Your auth middleware reads THIS cookie to look
-		// up the session in the database.
+
 		http.SetCookie(w, &http.Cookie{
 			Name:     "session_token",
 			Value:    sessionID,
 			Path:     "/",
 			Expires:  expiration,
-			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
 			// Secure: true, // enable once served over HTTPS
 		})
