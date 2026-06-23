@@ -1,6 +1,9 @@
+// =====================================================================
+//  app.js  —  Router + Auth + Layout
+// =====================================================================
+
 const app = document.getElementById('app');
 
-// Handle routing based on the URL path when the page loads
 document.addEventListener('DOMContentLoaded', () => {
   if (!app) {
     console.error('App container not found');
@@ -9,161 +12,136 @@ document.addEventListener('DOMContentLoaded', () => {
   router();
 });
 
-// Handle browser back/forward navigation buttons cleanly
-window.addEventListener('popstate', () => {
-  router();
-});
+window.addEventListener('popstate', () => router());
 
-/**
- * Client-Side Router
- */
+// ---------------- ROUTER ----------------
 function router() {
   const path = window.location.pathname;
 
-  const flash = localStorage.getItem('flash_message');
-  if (flash) {
-    displayMessage(flash, false);
-    localStorage.removeItem('flash_message');
-  }
 
   if (path === '/register') {
     renderRegister();
   } else if (path === '/login') {
     renderLogin();
   } else if (path === '/') {
-    renderSPAHome();
+    renderHome();
   } else {
-    app.innerHTML = `
-      <div class="not-found">
-        <h2>404 — Page Not Found</h2>
-        <p onclick="navigateTo('/')">Go back home</p>
-      </div>
-    `;
+    renderError(404);
   }
 }
 
-/**
- * Navigation Helper
- */
 function navigateTo(path) {
   window.history.pushState({}, '', path);
   router();
 }
 
-
+// ---------------- MESSAGE ----------------
 function displayMessage(message, isError = true) {
-  const existingMessage = document.getElementById('form-message');
-  if (existingMessage) existingMessage.remove();
+  const existing = document.getElementById('form-message');
+  if (existing) existing.remove();
 
-  const messageDiv = document.createElement('div');
-  messageDiv.id = 'form-message';
-  messageDiv.classList.add(isError ? 'is-error' : 'is-success');
-  messageDiv.innerText = message;
+  const div = document.createElement('div');
+  div.id = 'form-message';
+  div.classList.add(isError ? 'is-error' : 'is-success');
+  div.innerText = message;
 
   const heading = document.querySelector('#app h2');
-  if (heading) {
-    //add messageDiv after h2
-    heading.insertAdjacentElement('afterend', messageDiv);
-  }
+  if (heading) heading.insertAdjacentElement('afterend', div);
+  else app.prepend(div);
+}
+
+// ---------------- NAVBAR ----------------
+function renderNavbar() {
+  const isLoggedIn = document.cookie.includes('logged_in');
+  return `
+    <header class="navbar">
+      <div class="logo" onclick="navigateTo('/')">01Forum</div>
+      <div class="auth-buttons">
+        ${
+          isLoggedIn
+            ? `<button class="btn logout" onclick="handleLogout()">Logout</button>`
+            : `<button class="btn login"    onclick="navigateTo('/login')">Login</button>
+             <button class="btn register" onclick="navigateTo('/register')">Register</button>`
+        }
+      </div>
+    </header>`;
+}
+
+// ---------------- HOME LAYOUT ----------------
+function renderHome() {
+  if (window.location.pathname !== '/') window.history.pushState({}, '', '/');
+
+  app.innerHTML = `
+    ${renderNavbar()}
+    <div class="container">
+      <aside class="sidebar">
+        <h3>Filter Posts</h3>
+        <div class="filter-group">
+          <h4>By Category</h4>
+          <label><input type="checkbox" value="General"        onchange="filterPosts()"> General</label>
+          <label><input type="checkbox" value="Programming"    onchange="filterPosts()"> Programming</label>
+          <label><input type="checkbox" value="Gaming"         onchange="filterPosts()"> Gaming</label>
+          <label><input type="checkbox" value="Movies"         onchange="filterPosts()"> Movies</label>
+          <label><input type="checkbox" value="Sports"         onchange="filterPosts()"> Sports</label>
+        </div>
+        <button class="clear-btn" onclick="clearFilters()">Clear Filters</button>
+      </aside>
+
+      <main class="content">
+        <div id="posts-container">Loading feed...</div>
+      </main>
+    </div>`;
+
+  loadPosts();
 }
 
 // ---------------- LOGIN UI ----------------
 function renderLogin() {
-  if (
-    window.location.pathname !== '/login' &&
-    window.location.pathname !== '/'
-  ) {
-    window.history.pushState({}, '', '/login');
+  if (document.cookie.includes('logged_in')) {
+    navigateTo('/');
+    return;
   }
+  if (window.location.pathname !== '/login')
+    window.history.pushState({}, '', '/login');
 
   app.innerHTML = `
+    ${renderNavbar()}
     <div class="auth-shell">
       <h2>Login</h2>
-      <input id="login-id" placeholder="Email or Nickname">
+      <input id="login-id"   placeholder="Email or Nickname">
       <input id="login-pass" type="password" placeholder="Password">
       <button type="button" onclick="login()">Login</button>
-      <p class="auth-switch" onclick="navigateTo('/register')">Create account</p>
-    </div>
-  `;
+   
+    </div>`;
 }
 
 // ---------------- REGISTER UI ----------------
 function renderRegister() {
-  if (window.location.pathname !== '/register') {
-    window.history.pushState({}, '', '/register');
+  if (document.cookie.includes('logged_in')) {
+    navigateTo('/');
+    return;
   }
+  if (window.location.pathname !== '/register')
+    window.history.pushState({}, '', '/register');
 
   app.innerHTML = `
+    ${renderNavbar()}
     <div class="auth-shell">
       <h2>Register</h2>
-      <input id="nickname" placeholder="nickname">
-      <input id="first_name" placeholder="first name">
-      <input id="last_name" placeholder="last name">
-      <input id="age" type="number" placeholder="age">
+      <input id="nickname"         placeholder="Nickname">
+      <input id="first_name"       placeholder="First name">
+      <input id="last_name"        placeholder="Last name">
+      <input id="age" type="number" placeholder="Age">
       <select id="gender">
         <option value="">Select gender</option>
-        <option value="male">male</option>
-        <option value="female">female</option>
+        <option value="male">Male</option>
+        <option value="female">Female</option>
       </select>
-      <input id="email" placeholder="email">
-      <input id="password" type="password" placeholder="password">
-      <input id="confirm_password" type="password" placeholder="confirm password">
+      <input id="email"            placeholder="Email">
+      <input id="password"         type="password" placeholder="Password">
+      <input id="confirm_password" type="password" placeholder="Confirm password">
       <button type="button" onclick="register()">Register</button>
-      <p class="auth-switch" onclick="navigateTo('/login')">Login</p>
-    </div>
-  `;
-}
-
-// ---------------- SPA HOME DASHBOARD UI ----------------
-function renderSPAHome() {
-  if (window.location.pathname !== '/') {
-    window.history.pushState({}, '', '/');
-  }
-
-  const isLoggedIn = document.cookie.includes('logged_in');
-
-  app.innerHTML = `
-    <div class="zone-home">
-      <section id="posts-section">
-        <h2>Forum Feed</h2>
-        <div id="posts-container">Loading interactive feed...</div>
-      </section>
-
-      ${
-        isLoggedIn
-          ? `
-        <section id="chat-sidebar">
-          <h2>Active Chat</h2>
-          <div id="users-list">Loading chat list...</div>
-          <div id="private-messages-box">Select a user to view chat history</div>
-          <div class="chat-input-row">
-            <input id="msg-input" placeholder="Type a message...">
-            <button onclick="sendPrivateMessage()">Send</button>
-          </div>
-          <p class="logout-link" onclick="handleLogout()">Logout from all pages</p>
-        </section>
-      `
-          : `
-        <section id="chat-sidebar">
-          <h2>Join the conversation</h2>
-          <p style="color: var(--text-muted); font-size: 0.9rem; margin-bottom: 18px;">
-            Login or create an account to chat and post.
-          </p>
-          <button type="button" onclick="navigateTo('/login')">Login</button>
-          <p class="auth-switch" onclick="navigateTo('/register')">Create account</p>
-        </section>
-      `
-      }
-    </div>
-  `;
-
-  if (typeof loadPosts === 'function') {
-    loadPosts();
-  }
-
-  if (isLoggedIn && typeof initWebSocketsConnection === 'function') {
-    initWebSocketsConnection();
-  }
+    </div>`;
 }
 
 // ---------------- REGISTER ACTION ----------------
@@ -179,7 +157,6 @@ async function register() {
     'confirm_password',
   ];
   const data = {};
-
   for (let id of required) {
     const el = document.getElementById(id);
     if (!el || el.value.trim() === '') {
@@ -188,27 +165,23 @@ async function register() {
     }
     data[id] = el.value;
   }
-
   try {
     const res = await fetch('/register', {
       method: 'POST',
       body: new URLSearchParams(data),
     });
-
     const result = await res.json();
-
     if (!res.ok) {
       displayMessage(result.error || 'Registration failed', true);
       return;
     }
-
     localStorage.setItem(
       'flash_message',
       result.message || 'Account created successfully!'
     );
     navigateTo('/login');
   } catch (err) {
-    console.error('Register network error:', err);
+    console.error('Register error:', err);
     displayMessage('Network error, please try again', true);
   }
 }
@@ -216,40 +189,28 @@ async function register() {
 // ---------------- LOGIN ACTION ----------------
 async function login() {
   const loginInput = document.getElementById('login-id');
-  const passwordInput = document.getElementById('login-pass');
-
-  if (
-    !loginInput ||
-    !passwordInput ||
-    loginInput.value.trim() === '' ||
-    passwordInput.value.trim() === ''
-  ) {
+  const passInput = document.getElementById('login-pass');
+  if (!loginInput?.value.trim() || !passInput?.value.trim()) {
     displayMessage('Email/username and password are required', true);
     return;
   }
-
-  const data = {
-    login: loginInput.value,
-    password: passwordInput.value,
-  };
-
   try {
     const res = await fetch('/login', {
       method: 'POST',
-      body: new URLSearchParams(data),
+      body: new URLSearchParams({
+        login: loginInput.value,
+        password: passInput.value,
+      }),
     });
-
     const result = await res.json();
-
     if (!res.ok) {
       displayMessage(result.error || 'Login failed', true);
       return;
     }
-
     localStorage.setItem('flash_message', result.message || 'Login successful');
     navigateTo('/');
   } catch (err) {
-    console.error('Login network error:', err);
+    console.error('Login error:', err);
     displayMessage('Network error, please try again', true);
   }
 }
@@ -259,9 +220,53 @@ async function handleLogout() {
   try {
     await fetch('/logout', { method: 'POST' });
   } catch (err) {
-    console.error('Logout network error:', err);
+    console.error(err);
   }
   document.cookie =
     'logged_in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
   navigateTo('/');
+}
+
+// ---------------- ERROR PAGE ----------------
+const ERROR_META = {
+  400: {
+    title: 'Bad Request',
+    desc: 'The server could not understand your request.',
+  },
+  401: {
+    title: 'Unauthorized',
+    desc: 'You need to be logged in to access this page.',
+  },
+  403: {
+    title: 'Forbidden',
+    desc: "You don't have permission to access this page.",
+  },
+  404: {
+    title: 'Page Not Found',
+    desc: "The page you're looking for doesn't exist or has been moved.",
+  },
+  500: {
+    title: 'Internal Server Error',
+    desc: 'Something went wrong on our end. Please try again later.',
+  },
+  503: {
+    title: 'Service Unavailable',
+    desc: 'The server is temporarily unavailable. Please try again later.',
+  },
+};
+
+function renderError(status) {
+  const meta = ERROR_META[status] || {
+    title: 'Unexpected Error',
+    desc: 'Something went wrong.',
+  };
+
+  app.innerHTML = `
+    ${renderNavbar()}
+    <div class="error-page">
+      <div class="error-code">${status}</div>
+      <h2 class="error-title">${meta.title}</h2>
+      <p class="error-desc">${meta.desc}</p>
+      <button class="btn primary" onclick="navigateTo('/')">Back to Home</button>
+    </div>`;
 }
