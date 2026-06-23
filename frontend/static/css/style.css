@@ -1,545 +1,570 @@
-/* =========================================================
-   REAL-TIME FORUM — dark theme
-   "Night wire" concept: a forum feed reads like a dispatch
-   board, the chat sidebar reads like a live ticker.
-   Serif headlines + mono metadata + clean sans body.
-   ========================================================= */
+/* =====================================================================
+   style.css — Dark modern forum theme
+   ===================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
-
-:root {
-  /* surfaces */
-  --bg: #14161b;
-  --bg-elevated: #1b1e25;
-  --bg-inset: #0f1115;
-  --border: #2a2e38;
-  --border-strong: #3a3f4c;
-
-  /* text */
-  --text: #e9e6df;
-  --text-muted: #9298a6;
-  --text-faint: #5e6573;
-
-  /* accents */
-  --accent: #e3a23d; /* amber — primary / CTAs / posts */
-  --accent-strong: #f0b554;
-  --accent-soft-bg: #2c2415;
-  --link: #5fb3ad; /* teal — secondary / chat */
-  --link-soft-bg: #16292a;
-  --online: #6fb56a;
-  --danger: #e16a64;
-  --danger-bg: #2c1818;
-  --success: #7cc274;
-  --success-bg: #182a18;
-
-  /* type */
-  --font-display: 'Fraunces', Georgia, serif;
-  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
-
-  --radius: 8px;
-  --radius-sm: 4px;
+/* ---- Reset & Base ---- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
-/* ---------------- Reset & base ---------------- */
-* {
-  box-sizing: border-box;
+:root {
+  --bg-page: #0f0f11;
+  --bg-surface: #1a1a1f;
+  --bg-card: #222228;
+  --bg-input: #2a2a32;
+  --border: #2e2e38;
+  --border-hover: #44445a;
+  --accent: #6c63ff;
+  --accent-hover: #8278ff;
+  --text-primary: #f0f0f5;
+  --text-secondary: #9898b0;
+  --text-muted: #5a5a72;
+  --success: #22c97a;
+  --danger: #e05555;
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
 }
 
 html,
 body {
   height: 100%;
-  margin: 0;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-body);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-page);
+  color: var(--text-primary);
   font-size: 15px;
-  line-height: 1.5;
-  -webkit-font-smoothing: antialiased;
-}
-
-main {
-  display: block;
-  min-height: 100vh;
+  line-height: 1.6;
 }
 
 #app {
-  max-width: 1100px;
-  margin: 0 auto;
-  padding: 40px 24px 64px;
-}
-
-h2 {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 1.6rem;
-  letter-spacing: 0.01em;
-  color: var(--text);
-  margin: 0 0 18px;
-}
-
-p {
-  margin: 0;
-}
-
-input,
-select,
-button,
-textarea {
-  font-family: inherit;
-  font-size: 0.95rem;
-}
-
-a,
-.link-back,
-.auth-switch,
-.logout-link {
-  cursor: pointer;
-}
-
-::selection {
-  background: var(--accent-soft-bg);
-  color: var(--accent-strong);
-}
-
-/* dark scrollbars */
-* {
-  scrollbar-width: thin;
-  scrollbar-color: var(--border-strong) var(--bg-elevated);
-}
-*::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-*::-webkit-scrollbar-track {
-  background: var(--bg-elevated);
-}
-*::-webkit-scrollbar-thumb {
-  background: var(--border-strong);
-  border-radius: 8px;
-}
-*::-webkit-scrollbar-thumb:hover {
-  background: var(--text-faint);
-}
-
-/* visible keyboard focus everywhere */
-a:focus-visible,
-button:focus-visible,
-input:focus-visible,
-select:focus-visible,
-[onclick]:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
-}
-
-/* ---------------- Form feedback banner ---------------- */
-#form-message {
-  font-size: 0.88rem;
-  font-family: var(--font-mono);
-  padding: 10px 14px;
-  border-radius: var(--radius-sm);
-  margin: -4px 0 16px;
-  border: 1px solid transparent;
-}
-
-#form-message.is-error {
-  background: var(--danger-bg);
-  border-color: #4a2424;
-  color: var(--danger);
-}
-
-#form-message.is-success {
-  background: var(--success-bg);
-  border-color: #234023;
-  color: var(--success);
-}
-
-/* ---------------- 404 ---------------- */
-.not-found {
-  text-align: center;
-  padding: 80px 20px;
-  color: var(--text-muted);
-}
-
-.not-found h2 {
-  font-size: 2rem;
-}
-
-.not-found .link-back {
-  color: var(--link);
-  font-family: var(--font-mono);
-  font-size: 0.9rem;
-  margin-top: 10px;
-}
-
-.not-found .link-back:hover {
-  text-decoration: underline;
-}
-
-/* ---------------- Buttons (global) ---------------- */
-button {
-  background: var(--accent);
-  color: #1a1305;
-  border: none;
-  border-radius: var(--radius-sm);
-  padding: 10px 18px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  transition: background 0.15s ease, transform 0.1s ease;
-}
-
-button:hover {
-  background: var(--accent-strong);
-}
-
-button:active {
-  transform: translateY(1px);
-}
-
-/* ---------------- Inputs (global) ---------------- */
-input,
-select {
-  background: var(--bg-inset);
-  border: 1px solid var(--border);
-  color: var(--text);
-  border-radius: var(--radius-sm);
-  padding: 11px 13px;
-  width: 100%;
-  transition: border-color 0.15s ease;
-}
-
-input::placeholder {
-  color: var(--text-faint);
-}
-
-input:focus,
-select:focus {
-  border-color: var(--accent);
-}
-
-select {
-  appearance: none;
-  background-image: linear-gradient(
-      45deg,
-      transparent 50%,
-      var(--text-muted) 50%
-    ),
-    linear-gradient(135deg, var(--text-muted) 50%, transparent 50%);
-  background-position: calc(100% - 18px) center, calc(100% - 13px) center;
-  background-size: 5px 5px, 5px 5px;
-  background-repeat: no-repeat;
-}
-
-select option {
-  background: var(--bg-inset);
-  color: var(--text);
-}
-
-/* ---------------- Auth shell (login / register) ---------------- */
-.auth-shell {
-  max-width: 420px;
-  margin: 40px auto 0;
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-top: 3px solid var(--accent);
-  border-radius: var(--radius);
-  padding: 36px 32px;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+}
+
+/* ---- Scrollbar ---- */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-track {
+  background: var(--bg-page);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--border-hover);
+  border-radius: 99px;
+}
+
+/* =====================================================================
+   NAVBAR
+   ===================================================================== */
+.navbar {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 60px;
+  background: var(--bg-surface);
+  border-bottom: 1px solid var(--border);
+}
+
+.logo {
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent);
+  cursor: pointer;
+  letter-spacing: -0.3px;
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+/* =====================================================================
+   BUTTONS — base
+   ===================================================================== */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 8px 18px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--border-hover);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  font-weight: 500;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.btn:hover {
+  background: var(--bg-input);
+  border-color: var(--accent);
+}
+.btn:active {
+  transform: scale(0.97);
+}
+
+/* Navbar variants */
+.btn.login {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: transparent;
+}
+.btn.login:hover {
+  background: rgba(108, 99, 255, 0.1);
+}
+
+.btn.register {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn.register:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+.btn.logout {
+  color: var(--danger);
+  border-color: var(--danger);
+  background: transparent;
+}
+.btn.logout:hover {
+  background: rgba(224, 85, 85, 0.1);
+}
+
+/* Primary variant */
+.btn.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #fff;
+}
+.btn.primary:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+
+/* Cancel variant */
+.btn.cancel {
+  background: transparent;
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+.btn.cancel:hover {
+  background: var(--bg-input);
+}
+
+.create-post-btn {
+  margin-bottom: 1.25rem;
+}
+
+/* =====================================================================
+   LAYOUT
+   ===================================================================== */
+.container {
+  display: grid;
+  grid-template-columns: 220px 1fr;
+  gap: 1.5rem;
+  max-width: 1100px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 1.5rem 1.25rem;
+  flex: 1;
+}
+
+/* =====================================================================
+   SIDEBAR
+   ===================================================================== */
+.sidebar {
+  position: sticky;
+  top: 76px;
+  align-self: start;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem;
+}
+
+.sidebar h3 {
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+
+.filter-group h4 {
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  margin-bottom: 0.6rem;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  margin-bottom: 1rem;
+}
+
+.filter-group label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 5px 6px;
+  border-radius: var(--radius-sm);
+  transition: background 0.12s, color 0.12s;
+}
+.filter-group label:hover {
+  background: var(--bg-input);
+  color: var(--text-primary);
+}
+
+.filter-group input[type='checkbox'] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.clear-btn {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 7px;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-family: inherit;
+  text-align: center;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
+}
+.clear-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-secondary);
+}
+
+/* =====================================================================
+   CONTENT AREA
+   ===================================================================== */
+.content {
+  min-width: 0;
+}
+
+/* =====================================================================
+   POSTS
+   ===================================================================== */
+.posts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.post {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  transition: border-color 0.15s;
+}
+.post:hover {
+  border-color: var(--border-hover);
+}
+
+.post-header {
+  margin-bottom: 0.75rem;
+}
+
+.post-header h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 0.4rem;
+}
+
+.post-categories {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 0.4rem;
+}
+
+.category {
+  display: inline-block;
+  padding: 2px 10px;
+  background: rgba(108, 99, 255, 0.12);
+  color: var(--accent);
+  border: 1px solid rgba(108, 99, 255, 0.25);
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.post-body p {
+  font-size: 0.925rem;
+  color: var(--text-secondary);
+  line-height: 1.65;
+}
+
+.empty-feed,
+.error-text {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  padding: 2rem;
+  text-align: center;
+}
+
+/* =====================================================================
+   CREATE POST FORM
+   ===================================================================== */
+.create-post-form {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.create-post-form h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 1rem;
+  color: var(--text-primary);
+}
+
+.create-post-form input,
+.create-post-form select,
+.create-post-form textarea {
+  display: block;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.create-post-form input:focus,
+.create-post-form select:focus,
+.create-post-form textarea:focus {
+  border-color: var(--accent);
+}
+.create-post-form select option {
+  background: var(--bg-input);
+}
+.create-post-form textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.form-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 0.25rem;
+}
+
+/* =====================================================================
+   AUTH PAGES
+   ===================================================================== */
+.auth-shell {
+  width: 100%;
+  max-width: 420px;
+  margin: 3rem auto;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem 2.25rem;
 }
 
 .auth-shell h2 {
-  text-align: center;
-  margin-bottom: 6px;
+  font-size: 1.35rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  color: var(--text-primary);
 }
 
-.auth-shell h2::after {
-  content: '';
+/* inputs */
+.auth-shell input,
+.auth-shell select {
   display: block;
-  width: 36px;
-  height: 2px;
-  background: var(--accent);
-  margin: 12px auto 0;
+  width: 100%;
+  margin-bottom: 0.75rem;
+  padding: 10px 14px;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-primary);
+  font-size: 0.9rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.auth-shell input::placeholder {
+  color: var(--text-muted);
+}
+.auth-shell input:focus,
+.auth-shell select:focus {
+  border-color: var(--accent);
+}
+.auth-shell select option {
+  background: var(--bg-surface);
+  color: var(--text-primary);
 }
 
-.auth-shell button {
-  margin-top: 8px;
+/* submit button — overrides base .btn completely */
+.auth-shell button[type='button'] {
+  display: block;
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 11px 18px;
+  background: var(--accent);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  color: #fff;
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  transition: background 0.15s, transform 0.1s;
+  text-align: center;
+}
+.auth-shell button[type='button']:hover {
+  background: var(--accent-hover);
+  border-color: var(--accent-hover);
+}
+.auth-shell button[type='button']:active {
+  transform: scale(0.98);
 }
 
 .auth-switch {
+  margin-top: 1.25rem;
   text-align: center;
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--link);
-  margin-top: 4px;
+  font-size: 0.875rem;
+  color: var(--accent);
+  cursor: pointer;
 }
-
 .auth-switch:hover {
   text-decoration: underline;
 }
 
-/* ---------------- Home layout ---------------- */
-.zone-home {
-  display: grid;
-  grid-template-columns: 1fr 320px;
-  gap: 28px;
-  align-items: start;
-}
-
-/* ---------------- Posts feed ---------------- */
-#posts-section {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
-}
-
-#posts-container {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  color: var(--text-muted);
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-}
-
-/* Forward-looking classes for when posts are rendered by loadPosts() */
-.post-card {
-  background: var(--bg-inset);
-  border: 1px solid var(--border);
-  border-left: 3px solid var(--accent);
+/* =====================================================================
+   MESSAGES
+   ===================================================================== */
+#form-message {
+  padding: 10px 14px;
   border-radius: var(--radius-sm);
-  padding: 16px 18px;
+  font-size: 0.875rem;
+  margin-bottom: 1rem;
 }
-
-.post-card .post-title {
-  font-family: var(--font-display);
-  font-size: 1.15rem;
-  font-weight: 600;
-  color: var(--text);
-  margin: 0 0 6px;
-}
-
-.post-card .post-meta {
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-faint);
-  display: flex;
-  gap: 10px;
-  margin-bottom: 10px;
-}
-
-.post-card .post-category {
-  color: var(--accent);
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-}
-
-.post-card .post-body {
-  color: var(--text-muted);
-  font-family: var(--font-body);
-  font-size: 0.92rem;
-}
-
-.comment {
-  border-top: 1px solid var(--border);
-  padding-top: 10px;
-  margin-top: 10px;
-  font-family: var(--font-body);
-  font-size: 0.88rem;
-  color: var(--text-muted);
-}
-
-.comment .comment-author {
-  color: var(--link);
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  margin-right: 8px;
-}
-
-/* ---------------- Chat sidebar ---------------- */
-#chat-sidebar {
-  background: var(--bg-elevated);
-  border: 1px solid var(--border);
-  border-top: 3px solid var(--link);
-  border-radius: var(--radius);
-  padding: 22px;
-  position: sticky;
-  top: 24px;
-  display: flex;
-  flex-direction: column;
-  max-height: calc(100vh - 48px);
-}
-
-#users-list {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  color: var(--text-muted);
-  overflow-y: auto;
-  max-height: 220px;
-  margin-bottom: 14px;
-  border-bottom: 1px solid var(--border);
-  padding-bottom: 12px;
-}
-
-/* Forward-looking classes for the online users list */
-.user-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 6px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-}
-
-.user-item:hover {
-  background: var(--bg-inset);
-}
-
-.user-item.active {
-  background: var(--link-soft-bg);
-  color: var(--text);
-}
-
-.user-item .status-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--text-faint);
-  flex-shrink: 0;
-}
-
-.user-item.online .status-dot {
-  background: var(--online);
-  box-shadow: 0 0 0 3px rgba(111, 181, 106, 0.15);
-}
-
-.user-item .last-message {
-  color: var(--text-faint);
-  font-size: 0.78rem;
-  margin-left: auto;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 90px;
-}
-
-#private-messages-box {
-  flex: 1;
-  overflow-y: auto;
-  font-family: var(--font-body);
-  font-size: 0.88rem;
-  color: var(--text-faint);
-  padding: 4px 2px;
-  margin-bottom: 12px;
-}
-
-/* Forward-looking classes for message bubbles */
-.message {
-  margin-bottom: 10px;
-  max-width: 85%;
-}
-
-.message .message-meta {
-  font-family: var(--font-mono);
-  font-size: 0.7rem;
-  color: var(--text-faint);
-  margin-bottom: 2px;
-}
-
-.message .message-author {
-  color: var(--link);
-}
-
-.message .message-text {
-  background: var(--bg-inset);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  padding: 8px 11px;
-  color: var(--text);
-}
-
-.message.is-mine {
-  margin-left: auto;
-}
-
-.message.is-mine .message-text {
-  background: var(--accent-soft-bg);
-  border-color: #4a3a1c;
-}
-
-.chat-input-row {
-  display: flex;
-  gap: 8px;
-}
-
-.chat-input-row input {
-  flex: 1;
-}
-
-.chat-input-row button {
-  background: var(--link);
-  color: #06201d;
-  flex-shrink: 0;
-}
-
-.chat-input-row button:hover {
-  background: #74c4be;
-}
-
-.logout-link {
-  text-align: center;
-  font-family: var(--font-mono);
-  font-size: 0.78rem;
-  color: var(--text-faint);
-  margin-top: 14px;
-  padding-top: 12px;
-  border-top: 1px solid var(--border);
-}
-
-.logout-link:hover {
+.is-error {
+  background: rgba(224, 85, 85, 0.12);
   color: var(--danger);
+  border: 1px solid rgba(224, 85, 85, 0.25);
+}
+.is-success {
+  background: rgba(34, 201, 122, 0.12);
+  color: var(--success);
+  border: 1px solid rgba(34, 201, 122, 0.25);
 }
 
-/* "Join the conversation" logged-out state inside #chat-sidebar */
-#chat-sidebar .auth-switch {
-  margin-top: 10px;
+/* =====================================================================
+   ERROR PAGE
+   ===================================================================== */
+.error-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 1;
+  padding: 5rem 2rem;
+  text-align: center;
 }
 
-/* ---------------- Responsive ---------------- */
-@media (max-width: 860px) {
-  .zone-home {
+.error-code {
+  font-size: 7rem;
+  font-weight: 800;
+  line-height: 1;
+  background: linear-gradient(135deg, var(--accent) 0%, #a78bfa 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 1rem;
+  letter-spacing: -4px;
+}
+
+.error-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 0.75rem;
+}
+
+.error-desc {
+  font-size: 0.95rem;
+  color: var(--text-secondary);
+  max-width: 380px;
+  line-height: 1.7;
+  margin-bottom: 2rem;
+}
+
+.error-page .btn {
+  padding: 11px 32px;
+  font-size: 0.95rem;
+  font-weight: 600;
+}
+
+/* =====================================================================
+   RESPONSIVE
+   ===================================================================== */
+@media (max-width: 720px) {
+  .container {
     grid-template-columns: 1fr;
   }
 
-  #chat-sidebar {
+  .sidebar {
     position: static;
-    max-height: none;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
   }
 
-  #users-list {
-    max-height: 160px;
+  .sidebar h3 {
+    grid-column: 1 / -1;
   }
-
-  #app {
-    padding: 24px 16px 48px;
+  .filter-group {
+    grid-column: 1 / -1;
+  }
+  .navbar {
+    padding: 0 1rem;
   }
 
   .auth-shell {
-    margin-top: 16px;
-    padding: 28px 22px;
-  }
-}
-
-/* ---------------- Reduced motion ---------------- */
-@media (prefers-reduced-motion: reduce) {
-  * {
-    transition: none !important;
-    animation: none !important;
+    margin: 1.5rem 1rem;
+    padding: 1.5rem 1.25rem;
   }
 }
