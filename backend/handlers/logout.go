@@ -45,14 +45,5 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 		SameSite: http.SameSiteLaxMode,
 	})
 
-	// Clear the JS-readable flag too, so a stale tab updates its
-	// UI correctly even before the next router() call removes it.
-	http.SetCookie(w, &http.Cookie{
-		Name:    "logged_in",
-		Value:   "",
-		Path:    "/",
-		Expires: expired,
-	})
-
 	w.WriteHeader(http.StatusOK)
 }
