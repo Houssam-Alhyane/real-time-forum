@@ -1,5 +1,3 @@
-
-
 let allPosts = []; // cache for client-side filtering
 
 // ---------------- LOAD POSTS ----------------
@@ -44,9 +42,8 @@ function renderPosts(posts) {
   const container = document.getElementById('posts-container');
   if (!container) return;
 
-  const isLoggedIn = document.cookie.includes('logged_in');
-
-  const createBtn = isLoggedIn
+  // Use authState — never document.cookie
+  const createBtn = authState.authenticated
     ? `<button class="btn primary create-post-btn" onclick="renderCreatePostForm()">+ New Post</button>`
     : '';
 
@@ -131,12 +128,11 @@ async function submitPost() {
 
     if (!res.ok) {
       if (res.status === 401) {
-        // Call logout to delete the session from DB, then clear cookie and redirect
+        // Session expired on the server — reset local state and redirect
+        authState = { authenticated: false, user: null };
         try {
           await fetch('/logout', { method: 'POST' });
         } catch (_) {}
-        document.cookie =
-          'logged_in=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
         localStorage.setItem(
           'flash_message',
           'Session expired. Please log in again.'
