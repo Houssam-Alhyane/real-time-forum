@@ -78,20 +78,11 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			Value:    sessionID,
 			Path:     "/",
 			Expires:  expiration,
+			HttpOnly: true,
 			SameSite: http.SameSiteLaxMode,
-			// Secure: true, // enable once served over HTTPS
 		})
 
-		// A non-secret flag, readable by document.cookie, that the
-		// frontend uses purely to decide which UI to render.
-		http.SetCookie(w, &http.Cookie{
-			Name:    "logged_in",
-			Value:   "true",
-			Path:    "/",
-			Expires: expiration,
-		})
-
-		// Return a successful JSON response
+		// Return a successful JSON response — frontend calls /api/me to get auth state
 		w.Header().Set("Content-Type", "application/json")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]string{
