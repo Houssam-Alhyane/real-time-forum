@@ -1,9 +1,19 @@
-let allPosts = []; // cache for client-side filtering
+
+import { state } from './state.js';
+import { navigateTo } from './routeer.js';
+import { displayMessage } from './toast.js';
+import { escapeHTML } from './utils.js';
+
+let allPosts = [];
+let visibleCount = 10;
+const PAGE_SIZE = 10;
 
 // ---------------- LOAD POSTS ----------------
-async function loadPosts() {
+export async function loadPosts() {
   const container = document.getElementById('posts-container');
   if (!container) return;
+
+  visibleCount = PAGE_SIZE;
 
   try {
     const res = await fetch('/api/posts');
@@ -16,25 +26,34 @@ async function loadPosts() {
   }
 }
 
-// ---------------- FILTER ----------------
-function filterPosts() {
-  const checked = Array.from(
-    document.querySelectorAll('.sidebar input[type=checkbox]:checked')
-  ).map((cb) => cb.value);
-
-  if (checked.length === 0) {
-    renderPosts(allPosts);
-  } else {
-    const filtered = allPosts.filter((p) => checked.includes(p.category_name));
-    renderPosts(filtered);
-  }
+// ---------------- LOAD MORE ----------------
+export function loadMorePosts() {
+  visibleCount += PAGE_SIZE;
+  const source = getFilteredPosts();
+  renderPosts(source);
 }
 
-function clearFilters() {
+// ---------------- FILTER ----------------
+export function filterPosts() {
+  visibleCount = PAGE_SIZE;
+  renderPosts(getFilteredPosts());
+}
+
+export function clearFilters() {
+  visibleCount = PAGE_SIZE;
   document
     .querySelectorAll('.sidebar input[type=checkbox]')
     .forEach((cb) => (cb.checked = false));
   renderPosts(allPosts);
+}
+
+function getFilteredPosts() {
+  const checked = Array.from(
+    document.querySelectorAll('.sidebar input[type=checkbox]:checked')
+  ).map((cb) => cb.value);
+  return checked.length === 0
+    ? allPosts
+    : allPosts.filter((p) => checked.includes(p.category_name));
 }
 
 // ---------------- RENDER POSTS ----------------
@@ -42,9 +61,8 @@ function renderPosts(posts) {
   const container = document.getElementById('posts-container');
   if (!container) return;
 
-  // Use authState — never document.cookie
-  const createBtn = authState.authenticated
-    ? `<button class="btn primary create-post-btn" onclick="renderCreatePostForm()">+ New Post</button>`
+  const createBtn = state.auth.authenticated
+    ? `<button class="btn primary create-post-btn" onclick="window._renderCreatePostForm()">+ New Post</button>`
     : '';
 
   if (!posts || posts.length === 0) {
@@ -52,7 +70,10 @@ function renderPosts(posts) {
     return;
   }
 
-  const cards = posts
+  const visible = posts.slice(0, visibleCount);
+  const hasMore = posts.length > visibleCount;
+
+  const cards = visible
     .map(
       (p) => `
     <article class="post">
@@ -70,11 +91,21 @@ function renderPosts(posts) {
     )
     .join('');
 
-  container.innerHTML = `${createBtn}<div class="posts-list">${cards}</div>`;
+  const loadMoreBtn = hasMore
+    ? `<div class="load-more-wrap">
+        <button class="btn load-more-btn" onclick="window._loadMorePosts()">
+          Load more <span class="load-more-count">(${
+            posts.length - visibleCount
+          } remaining)</span>
+        </button>
+       </div>`
+    : '';
+
+  container.innerHTML = `${createBtn}<div class="posts-list">${cards}</div>${loadMoreBtn}`;
 }
 
 // ---------------- CREATE POST FORM ----------------
-function renderCreatePostForm() {
+export function renderCreatePostForm() {
   const container = document.getElementById('posts-container');
   if (!container) return;
 
@@ -98,8 +129,8 @@ function renderCreatePostForm() {
           </select>
           <textarea id="post-content" placeholder="Write your post..." rows="5"></textarea>
           <div class="form-actions">
-            <button type="button" class="btn primary" onclick="submitPost()">Publish</button>
-            <button type="button" class="btn"         onclick="loadPosts()">Cancel</button>
+            <button type="button" class="btn primary" onclick="window._submitPost()">Publish</button>
+            <button type="button" class="btn"         onclick="window._loadPosts()">Cancel</button>
           </div>
         </div>`;
     })
@@ -109,7 +140,7 @@ function renderCreatePostForm() {
 }
 
 // ---------------- SUBMIT POST ----------------
-async function submitPost() {
+export async function submitPost() {
   const title = document.getElementById('post-title')?.value.trim();
   const content = document.getElementById('post-content')?.value.trim();
   const categoryID = document.getElementById('post-category')?.value;
@@ -128,8 +159,7 @@ async function submitPost() {
 
     if (!res.ok) {
       if (res.status === 401) {
-        // Session expired on the server — reset local state and redirect
-        authState = { authenticated: false, user: null };
+        state.auth = { authenticated: false, user: null };
         try {
           await fetch('/logout', { method: 'POST' });
         } catch (_) {}
@@ -150,15 +180,4 @@ async function submitPost() {
     console.error('submitPost error:', err);
     displayMessage('Network error. Please try again.', true);
   }
-}
-
-// ---------------- UTILITY ----------------
-function escapeHTML(str) {
-  if (typeof str !== 'string') return '';
-  return str
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }

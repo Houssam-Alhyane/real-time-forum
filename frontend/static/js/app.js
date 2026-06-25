@@ -51,19 +51,30 @@ function navigateTo(path) {
   router();
 }
 
-// ---------------- MESSAGE ----------------
+// ---------------- TOAST NOTIFICATION ----------------
 function displayMessage(message, isError = true) {
-  const existing = document.getElementById('form-message');
+  // Remove any existing toast
+  const existing = document.getElementById('toast-notification');
   if (existing) existing.remove();
 
-  const div = document.createElement('div');
-  div.id = 'form-message';
-  div.classList.add(isError ? 'is-error' : 'is-success');
-  div.innerText = message;
+  const toast = document.createElement('div');
+  toast.id = 'toast-notification';
+  toast.classList.add('toast', isError ? 'toast-error' : 'toast-success');
+  toast.innerHTML = `
+    <span class="toast-icon">${isError ? '✕' : '✓'}</span>
+    <span class="toast-text">${message}</span>
+  `;
 
-  const heading = document.querySelector('#app h2');
-  if (heading) heading.insertAdjacentElement('afterend', div);
-  else app.prepend(div);
+  document.body.append(toast);
+
+  // Trigger enter animation
+  toast.classList.add('toast-visible');
+
+  // Auto-dismiss after 3 seconds
+  setTimeout(() => {
+    toast.classList.remove('toast-visible');
+
+  }, 3000);
 }
 
 // ---------------- NAVBAR ----------------
@@ -74,7 +85,9 @@ function renderNavbar() {
       <div class="auth-buttons">
         ${
           authState.authenticated
-            ? `<span class="nav-username">${escapeHTML(authState.user?.nickname || '')}</span>
+            ? `<span class="nav-username">${escapeHTML(
+                authState.user?.nickname || ''
+              )}</span>
                <button class="btn logout" onclick="handleLogout()">Logout</button>`
             : `<button class="btn login"    onclick="navigateTo('/login')">Login</button>
                <button class="btn register" onclick="navigateTo('/register')">Register</button>`
