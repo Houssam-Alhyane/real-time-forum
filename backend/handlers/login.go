@@ -70,7 +70,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		UpdateLastSeen(userID)
+		database.UpdateLastSeen(userID)
 
 		http.SetCookie(w, &http.Cookie{
 			Name:     "session_token",
