@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"zone/backend/database"
-	"zone/backend/handlers"
+	"zone/backend/routing"
 )
 
 func main() {
@@ -17,20 +17,9 @@ func main() {
 	fs := http.FileServer(http.Dir("./frontend/static"))
 	http.Handle("/static/", http.StripPrefix("/static/", fs))
 
-	// Auth routes
-	// Add this to main.go:
-	http.HandleFunc("/register", handlers.Register)
-	http.HandleFunc("/login", handlers.Login)
-	http.HandleFunc("/logout", handlers.Logout)
-http.HandleFunc("/api/me", handlers.Me) 
-	// API routes
-	http.HandleFunc("/api/posts", handlers.GetPostsAPI)
-	http.HandleFunc("/api/categories", handlers.GetCategoriesAPI)
-	http.HandleFunc("/api/posts/create", handlers.CreatePostAPI)
+		routing.RegisterRout()
 
-	// Catch-all: serve index.html for SPA routes, 404 for unknown /api/* paths
 	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		// Any unknown /api/* path → JSON 404
 		if len(r.URL.Path) >= 4 && r.URL.Path[:4] == "/api" {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)

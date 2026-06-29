@@ -9,7 +9,7 @@ import (
 
 type MeResponse struct {
 	Authenticated bool   `json:"authenticated"`
-	UserID        int    `json:"user_id,omitempty"`
+	UserID        int    `json:"id,omitempty"`
 	Nickname      string `json:"nickname,omitempty"`
 	Email         string `json:"email,omitempty"`
 }

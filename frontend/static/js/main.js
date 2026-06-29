@@ -11,9 +11,13 @@ import {
   renderCreatePostForm,
   submitPost,
 } from './posts.js';
+import { disconnectWS } from './ws.js';
 
 window._nav = navigateTo;
-window._logout = handleLogout;
+window._logout = async () => {
+  disconnectWS();
+  await handleLogout();
+};
 window._login = login;
 window._register = register;
 window._loadPosts = loadPosts;
@@ -23,14 +27,12 @@ window._clearFilters = clearFilters;
 window._renderCreatePostForm = renderCreatePostForm;
 window._submitPost = submitPost;
 
-// ---- Boot ----
 document.addEventListener('DOMContentLoaded', async () => {
   const app = document.getElementById('app');
   if (!app) {
-    console.error('App container #app not found');
+    console.error('#app not found');
     return;
   }
-
   await initAuth();
   router();
 });

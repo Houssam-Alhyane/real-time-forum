@@ -1,7 +1,7 @@
-
-
 import { renderNavbar } from '../navbar.js';
 import { loadPosts, filterPosts, clearFilters } from '../posts.js';
+import { renderChatSidebar, loadUsers } from '../listusers.js';
+import { connectWS } from '../ws.js';
 
 export function renderHome() {
   const app = document.getElementById('app');
@@ -26,7 +26,11 @@ export function renderHome() {
       <main class="content">
         <div id="posts-container">Loading feed...</div>
       </main>
+
+      ${renderChatSidebar()}
     </div>`;
 
   loadPosts();
+  loadUsers(); 
+  connectWS(); 
 }

@@ -1,0 +1,111 @@
+// =====================================================================
+//  ws.js — WebSocket client
+//  Handles:
+//    users          → update user list live
+//    new_post       → prepend post to feed live
+//    session_kicked → reload page (logged in elsewhere)
+// =====================================================================
+
+import { state } from './state.js';
+import { escapeHTML } from './utils.js';
+import { renderUserList } from './listusers.js';
+
+let ws = null;
+let reconnectTimer = null;
+
+// ---- connect / disconnect -------------------------------------------
+
+export function connectWS() {
+  if (!state.auth.authenticated) return;
+
+  // already open or connecting — don't create a second connection
+  if (
+    ws &&
+    (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING)
+  )
+    return;
+
+  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
+  ws = new WebSocket(`${proto}://${location.host}/ws`);
+
+  ws.onopen = () => clearTimeout(reconnectTimer);
+  ws.onmessage = (e) => {
+    try {
+      handle(JSON.parse(e.data));
+    } catch {}
+  };
+  ws.onclose = () => {
+    reconnectTimer = setTimeout(connectWS, 3000);
+  };
+  ws.onerror = () => ws.close();
+}
+
+export function disconnectWS() {
+  clearTimeout(reconnectTimer);
+  if (ws) {
+    ws.close();
+    ws = null;
+  }
+}
+
+// ---- event handler --------------------------------------------------
+
+function handle(msg) {
+  switch (msg.type) {
+    case 'users':
+      // server sends full list — filter self out then render
+      renderUserList(
+        (msg.users || []).filter((u) => u.id !== state.auth.user?.id)
+      );
+      break;
+
+    case 'new_post':
+      prependPost(msg.post);
+      break;
+
+    case 'session_kicked':
+      disconnectWS();
+      location.reload();function prependPost(post) {
+  if (!post) return;
+  const list = document.querySelector('.posts-list');
+  if (!list) return;
+
+  const card = document.createElement('article');
+  card.className = 'post';
+  card.innerHTML = `
+    <div class="post-header">
+      <h3>${escapeHTML(post.title)}</h3>
+      <div class="post-categories">
+        <span class="category">${escapeHTML(post.category_name)}</span>
+      </div>
+    </div>
+    <div class="post-body">
+      <p>${escapeHTML(post.content)}</p>
+    </div>`;
+  list.prepend(card);
+}
+      break;
+  }
+}
+
+// ---- new post -------------------------------------------------------
+
+function prependPost(post) {
+  if (!post) return;
+  const list = document.querySelector('.posts-list');
+  if (!list) return;
+
+  const card = document.createElement('article');
+  card.className = 'post';
+  card.innerHTML = `
+    <div class="post-header">
+      <h3>${escapeHTML(post.title)}</h3>
+      <div class="post-categories">
+        <span class="category">${escapeHTML(post.category_name)}</span>
+      </div>
+    </div>
+    <div class="post-body">
+      <p>${escapeHTML(post.content)}</p>
+    </div>`;
+  list.prepend(card);
+}
