@@ -44,11 +44,7 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 		}
 
 		// Update activity
-		_, _ = database.Database.Exec(`
-			UPDATE users
-			SET last_seen = CURRENT_TIMESTAMP
-			WHERE id = ?
-		`, userID)
+		database.UpdateLastSeen(userID)
 
 		next(w, r)
 	}
