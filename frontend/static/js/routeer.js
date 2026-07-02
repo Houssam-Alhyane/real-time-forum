@@ -2,9 +2,17 @@ import { renderHome } from './pages/home.js';
 import { renderLogin } from './pages/login.js';
 import { renderRegister } from './pages/register.js';
 import { renderError } from './pages/error.js';
+import { state } from './state.js';
 
 export function router() {
   const path = window.location.pathname;
+
+  const publicPaths = ['/login', '/register'];
+  const auth = state.auth.authenticated;
+  if (!auth && !publicPaths.includes(path)) {
+    navigateTo('/login');
+    return;
+  }
 
   if (path === '/') {
     renderHome();
