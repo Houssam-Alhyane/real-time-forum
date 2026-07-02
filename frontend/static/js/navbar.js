@@ -9,7 +9,7 @@ export function renderNavbar() {
         ${
           state.auth.authenticated
             ? `<span class="nav-username">${escapeHTML(
-                state.auth.user?.nickname || ''
+                state.auth.nickname || ''
               )}</span>
                <button class="btn logout" onclick="window._logout()">Logout</button>`
             : `<button class="btn login"    onclick="window._nav('/login')">Login</button>

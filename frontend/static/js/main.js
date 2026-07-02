@@ -12,7 +12,9 @@ import {
   submitPost,
 } from './posts.js';
 import { disconnectWS } from './ws.js';
+import { reactToPost } from './reactions.js';
 
+window._react = reactToPost;
 window._nav = navigateTo;
 window._logout = async () => {
   disconnectWS();
