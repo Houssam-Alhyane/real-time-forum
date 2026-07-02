@@ -1,6 +1,6 @@
-/* =====================================================================
+/*  
    style.css — Real Time Forum (Cyberpunk Edition)
-   ===================================================================== */
+     */
 
 @import url('https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Serif+Display:ital@0;1&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap');
 
@@ -63,9 +63,9 @@ body {
   border-radius: 3px;
 }
 
-/* =====================================================================
+/*  
    NAVBAR
-   ===================================================================== */
+     */
 .navbar {
   position: sticky;
   top: 0;
@@ -107,9 +107,9 @@ body {
   letter-spacing: 0.04em;
 }
 
-/* =====================================================================
+/*  
    BUTTONS — base
-   ===================================================================== */
+     */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -194,9 +194,9 @@ body {
   margin-bottom: 1.25rem;
 }
 
-/* =====================================================================
+/*  
    LAYOUT
-   ===================================================================== */
+     */
 .container {
   display: grid;
   grid-template-columns: 220px 1fr;
@@ -208,9 +208,9 @@ body {
   flex: 1;
 }
 
-/* =====================================================================
+/*  
    SIDEBAR
-   ===================================================================== */
+     */
 .sidebar {
   position: sticky;
   top: 76px;
@@ -294,16 +294,16 @@ body {
   color: var(--accent);
 }
 
-/* =====================================================================
+/*  
    CONTENT AREA
-   ===================================================================== */
+     */
 .content {
   min-width: 0;
 }
 
-/* =====================================================================
+/*  
    POSTS
-   ===================================================================== */
+     */
 .posts-list {
   display: flex;
   flex-direction: column;
@@ -360,7 +360,70 @@ body {
   color: var(--text-secondary);
   line-height: 1.7;
 }
+/*  
+   POST REACTIONS
+     */
+.post-reactions {
+  display: flex;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+}
 
+.react-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0.35rem 0.75rem;
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s, transform 0.1s;
+}
+
+.react-btn:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  background: var(--bg-card);
+}
+
+.react-btn:active {
+  transform: scale(0.96);
+}
+
+.react-btn .like-count,
+.react-btn .dislike-count {
+  font-family: var(--mono);
+  color: inherit;
+}
+
+/* active (user's current reaction) */
+.react-btn.like-btn.active {
+  border-color: var(--success);
+  color: var(--success);
+  background: rgba(46, 204, 113, 0.08);
+}
+.react-btn.like-btn.active:hover {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.react-btn.dislike-btn.active {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: rgba(231, 76, 60, 0.08);
+}
+.react-btn.dislike-btn.active:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
 .empty-feed,
 .error-text {
   color: var(--text-secondary);
@@ -370,9 +433,9 @@ body {
   text-align: center;
 }
 
-/* =====================================================================
+/*  
    CREATE POST FORM
-   ===================================================================== */
+     */
 .create-post-form {
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -426,9 +489,9 @@ body {
   margin-top: 0.25rem;
 }
 
-/* =====================================================================
+/*  
    AUTH PAGES
-   ===================================================================== */
+     */
 .auth-shell {
   width: 100%;
   max-width: 420px;
@@ -514,9 +577,9 @@ body {
   text-decoration: underline;
 }
 
-/* =====================================================================
+/*  
    MESSAGES
-   ===================================================================== */
+     */
 #form-message {
   padding: 10px 14px;
   border-radius: var(--radius-sm);
@@ -536,9 +599,9 @@ body {
   border: 1px solid var(--success);
 }
 
-/* =====================================================================
+/*  
    ERROR PAGE
-   ===================================================================== */
+     */
 .error-page {
   display: flex;
   flex-direction: column;
@@ -580,9 +643,9 @@ body {
   font-size: 0.72rem;
 }
 
-/* =====================================================================
+/*  
    TOAST NOTIFICATION
-   ===================================================================== */
+     */
 .toast {
   position: fixed;
   top: 5rem;
@@ -628,9 +691,9 @@ body {
   justify-content: center;
 }
 
-/* =====================================================================
+/*  
    LOAD MORE
-   ===================================================================== */
+     */
 .load-more-wrap {
   display: flex;
   justify-content: center;
@@ -651,9 +714,6 @@ body {
   font-size: 0.65rem;
 }
 
-/* =====================================================================
-   RESPONSIVE
-   ===================================================================== */
 @media (max-width: 720px) {
   .container {
     grid-template-columns: 1fr;
@@ -682,9 +742,6 @@ body {
   }
 }
 
-/* =====================================================================
-   CHAT SIDEBAR — always visible, right column
-   ===================================================================== */
 
 .container {
   grid-template-columns: 220px 1fr 260px;
@@ -1038,9 +1095,7 @@ body {
   cursor: not-allowed;
 }
 
-/* =====================================================================
-   RESPONSIVE
-   ===================================================================== */
+
 @media (max-width: 1080px) {
   .container {
     grid-template-columns: 220px 1fr;
