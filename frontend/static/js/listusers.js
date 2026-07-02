@@ -1,4 +1,4 @@
-
+import { state } from './state.js';
 import { escapeHTML } from './utils.js';
 
 // ---- sidebar shell --------------------------------------------------
@@ -24,9 +24,11 @@ function getSorted(users) {
     .sort(
       (a, b) => new Date(b.last_message_time) - new Date(a.last_message_time)
     );
+
   const withoutMsg = users
     .filter((u) => !u.last_message_time)
     .sort((a, b) => a.nickname.localeCompare(b.nickname));
+
   return [...withMsg, ...withoutMsg];
 }
 
@@ -39,7 +41,10 @@ export function renderUserList(users) {
 
   const sorted = getSorted(users);
   const online = sorted.filter((u) => u.online).length;
-  if (countEl) countEl.textContent = `${online} online`;
+
+  if (countEl) {
+    countEl.textContent = `${online} online`;
+  }
 
   if (sorted.length === 0) {
     list.innerHTML = `<div class="chat-empty-list">No users yet</div>`;
@@ -49,14 +54,14 @@ export function renderUserList(users) {
   list.innerHTML = sorted
     .map(
       (u) => `
-    <div class="chat-user-item ${u.online ? '' : 'offline'}">
-      <div class="chat-avatar">
-        ${escapeHTML(u.nickname[0].toUpperCase())}
-        <span class="chat-dot ${u.online ? 'dot-on' : 'dot-off'}"></span>
+      <div class="chat-user-item ${u.online ? '' : 'offline'}">
+        <div class="chat-avatar">
+          ${escapeHTML(u.nickname[0].toUpperCase())}
+          <span class="chat-dot ${u.online ? 'dot-on' : 'dot-off'}"></span>
+        </div>
+        <span class="chat-username">${escapeHTML(u.nickname)}</span>
       </div>
-      <span class="chat-username">${escapeHTML(u.nickname)}</span>
-    </div>
-  `
+    `
     )
     .join('');
 }
@@ -65,19 +70,22 @@ export function renderUserList(users) {
 
 export async function loadUsers() {
   try {
-    const [usersRes, meRes] = await Promise.all([
-      fetch('/api/users'),
-      fetch('/api/me'),
-    ]);
-    if (!usersRes.ok || !meRes.ok) throw new Error();
+    const res = await fetch('/api/users');
 
-    const users = await usersRes.json();
-    const me = await meRes.json();
+    if (!res.ok) {
+      throw new Error('Failed to load users');
+    }
 
-    renderUserList(users.filter((u) => u.id !== me.id));
-  } catch {
+    const users = await res.json();
+
+    // Filter out the currently logged-in user using state.auth.id
+    renderUserList(users.filter((u) => u.id !== state.auth.id));
+  } catch (err) {
+    console.error('loadUsers error:', err);
+
     const list = document.getElementById('chat-user-list');
-    if (list)
+    if (list) {
       list.innerHTML = `<div class="chat-empty-list">Could not load users</div>`;
+    }
   }
 }
