@@ -6,9 +6,8 @@ import (
 	"zone/backend/database"
 )
 
-// GetUserIDFromSession extracts the authenticated user ID from the
-// session_token cookie. Returns sql.ErrNoRows when the cookie is
-// missing, invalid, or the session has expired.
+//take userid in database with cookie
+
 func GetUserIDFromSession(r *http.Request) (int, error) {
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
