@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"log"
 	"net/http"
 	"strconv"
@@ -91,8 +90,7 @@ func GetPostsAPI(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(posts)
+	RespondJSON(w, http.StatusOK, posts)
 }
 
 func GetCategoriesAPI(w http.ResponseWriter, r *http.Request) {
@@ -117,8 +115,7 @@ func GetCategoriesAPI(w http.ResponseWriter, r *http.Request) {
 		categories = append(categories, c)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(categories)
+	RespondJSON(w, http.StatusOK, categories)
 }
 
 func CreatePostAPI(w http.ResponseWriter, r *http.Request) {
@@ -182,7 +179,5 @@ postID, err := result.LastInsertId()
 		BroadcastNewPost(post)
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusCreated)
-	json.NewEncoder(w).Encode(map[string]string{"message": "Post created successfully!"})
+	RespondJSON(w, http.StatusCreated, map[string]string{"message": "Post created successfully!"})
 }

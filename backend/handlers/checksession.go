@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 	"zone/backend/database"
 )
@@ -23,11 +22,9 @@ func Me(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-
 	userID, err := GetUserIDFromSession(r)
 	if err != nil {
-		json.NewEncoder(w).Encode(MeResponse{Authenticated: false})
+		RespondJSON(w, http.StatusOK, MeResponse{Authenticated: false})
 		return
 	}
 
@@ -45,5 +42,5 @@ func Me(w http.ResponseWriter, r *http.Request) {
 	resp.Authenticated = true
 	resp.UserID = userID
 
-	json.NewEncoder(w).Encode(resp)
+	RespondJSON(w, http.StatusOK, resp)
 }

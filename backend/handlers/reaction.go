@@ -83,8 +83,7 @@ func ReactToPost(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(resp)
+	RespondJSON(w, http.StatusOK, resp)
 }
 
 func getReactionSummary(postID, userID int) (ReactResponse, error) {

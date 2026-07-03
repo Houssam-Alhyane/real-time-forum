@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 	"strings"
 	"time"
@@ -77,9 +76,7 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			SameSite: http.SameSiteLaxMode,
 		})
 
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{"message": "login successfully"})
+		RespondJSON(w, http.StatusOK, map[string]string{"message": "login successfully"})
 
 	default:
 		HandleError(w, http.StatusMethodNotAllowed, "Method not allowed")

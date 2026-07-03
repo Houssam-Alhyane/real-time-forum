@@ -23,11 +23,6 @@ export async function initAuth() {
     state.auth = await res.json();
   } catch (err) {
     console.error('initAuth error:', err);
-    state.auth = {
-      authenticated: false,
-      id: null,
-      nickname: null,
-      email: null,
-    };
+    resetAuth();
   }
 }

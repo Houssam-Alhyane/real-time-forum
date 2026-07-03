@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"net/http"
 	"strconv"
 	"strings"
@@ -143,9 +142,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// Success response
-		w.Header().Set("Content-Type", "application/json")
-		w.WriteHeader(http.StatusOK)
-		json.NewEncoder(w).Encode(map[string]string{
+		RespondJSON(w, http.StatusOK, map[string]string{
 			"message": "User created successfully!",
 		})
 
