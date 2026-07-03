@@ -28,9 +28,6 @@ func Register(w http.ResponseWriter, r *http.Request) {
 	}
 
 	switch r.Method {
-	case http.MethodGet:
-		RenderTemplate(w, 200, "index.html", nil)
-		return
 
 	case http.MethodPost:
 		confirmPassword := r.FormValue("confirm_password")

@@ -10,24 +10,6 @@ export async function reactToPost(postId, type) {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ post_id: postId, type }),
     });
-
-    if (!res.ok) {
-      if (res.status === 401) {
-        state.auth = { authenticated: false, user: null };
-        try {
-          await fetch('/logout', { method: 'POST' });
-        } catch (_) {}
-        localStorage.setItem(
-          'flash_message',
-          'Session expired. Please log in again.'
-        );
-        navigateTo('/login');
-        return;
-      }
-      displayMessage('Failed to react to post', true);
-      return;
-    }
-
     const data = await res.json();
     updateReactionUI(postId, data);
   } catch (err) {

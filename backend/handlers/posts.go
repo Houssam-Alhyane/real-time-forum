@@ -159,7 +159,11 @@ func CreatePostAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// broadcast new post to all connected clients via WebSocket
-	postID, _ := result.LastInsertId()
+postID, err := result.LastInsertId()
+	if err != nil {
+    HandleError(w, http.StatusInternalServerError, "Could not get new post ID")
+    return
+	}
 	var post PostResponse
 	err = database.Database.QueryRow(`
 		SELECT

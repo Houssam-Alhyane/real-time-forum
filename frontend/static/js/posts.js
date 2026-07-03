@@ -149,23 +149,6 @@ export async function submitPost() {
     });
     const result = await res.json();
 
-    if (!res.ok) {
-      if (res.status === 401) {
-        state.auth = { authenticated: false, user: null };
-        try {
-          await fetch('/logout', { method: 'POST' });
-        } catch (_) {}
-        localStorage.setItem(
-          'flash_message',
-          'Session expired. Please log in again.'
-        );
-        navigateTo('/login');
-        return;
-      }
-      displayMessage(result.error || 'Failed to create post', true);
-      return;
-    }
-
     await loadPosts();
     displayMessage(result.message || 'Post created!', false);
   } catch (err) {

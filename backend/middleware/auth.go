@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"zone/backend/database"
+	"zone/backend/handlers"
 )
 
 func Auth(next http.HandlerFunc) http.HandlerFunc {
@@ -13,7 +14,7 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 
 		cookie, err := r.Cookie("session_token")
 		if err != nil {
-			http.Error(w, "Unauthorized", http.StatusUnauthorized)
+			handlers.HandleError(w, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
 
