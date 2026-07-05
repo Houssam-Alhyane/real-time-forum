@@ -1,4 +1,3 @@
-
 import { state } from './state.js';
 import { postCardHTML } from './utils.js';
 import { renderUserList } from './listusers.js';
@@ -6,7 +5,7 @@ import { renderUserList } from './listusers.js';
 let ws = null;
 let reconnectTimer = null;
 
-// connect / disconnect 
+// connect / disconnect
 
 export function connectWS() {
   if (!state.auth.authenticated) return;
@@ -18,8 +17,7 @@ export function connectWS() {
   )
     return;
 
-  const proto = location.protocol === 'https:' ? 'wss' : 'ws';
-  ws = new WebSocket(`${proto}://${location.host}/ws`);
+  ws = new WebSocket(`http://localhost:8080/ws`);
 
   ws.onopen = () => clearTimeout(reconnectTimer);
   ws.onmessage = (e) => {
@@ -41,15 +39,13 @@ export function disconnectWS() {
   }
 }
 
-//  event handler 
+//  event handler
 
 function handle(msg) {
   switch (msg.type) {
     case 'users':
       // server sends full list — filter self out then render
-      renderUserList(
-        (msg.users || []).filter((u) => u.id !== state.auth.id)
-      );
+      renderUserList((msg.users || []).filter((u) => u.id !== state.auth.id));
       break;
 
     case 'new_post':
@@ -63,7 +59,7 @@ function handle(msg) {
   }
 }
 
-//  new post 
+//  new post
 
 function prependPost(post) {
   if (!post) return;
@@ -75,4 +71,3 @@ function prependPost(post) {
   card.innerHTML = postCardHTML(post);
   list.prepend(card);
 }
-
