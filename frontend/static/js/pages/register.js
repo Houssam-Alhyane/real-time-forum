@@ -66,10 +66,7 @@ export async function register() {
       return;
     }
 
-    localStorage.setItem(
-      'flash_message',
-      result.message || 'Account created successfully!'
-    );
+    displayMessage('Account created successfully!', false);
     navigateTo('/login');
   } catch (err) {
     console.error('Register error:', err);

@@ -40,13 +40,13 @@ export async function login() {
       }),
     });
     const result = await res.json();
-
     if (!res.ok) {
       displayMessage(result.error || 'Login failed', true);
       return;
     }
 
     await initAuth();
+    displayMessage('login successfully', false);
     navigateTo('/');
   } catch (err) {
     console.error('Login error:', err);

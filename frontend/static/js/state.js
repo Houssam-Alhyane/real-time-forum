@@ -3,7 +3,6 @@ export const state = {
     authenticated: false,
     id: null,
     nickname: null,
-    email: null,
   },
 };
 
@@ -12,7 +11,6 @@ export function resetAuth() {
     authenticated: false,
     id: null,
     nickname: null,
-    email: null,
   };
 }
 

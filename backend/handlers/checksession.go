@@ -9,7 +9,6 @@ type MeResponse struct {
 	Authenticated bool   `json:"authenticated"`
 	UserID        int    `json:"id,omitempty"`
 	Nickname      string `json:"nickname,omitempty"`
-	Email         string `json:"email,omitempty"`
 }
 
 func Me(w http.ResponseWriter, r *http.Request) {
@@ -30,9 +29,9 @@ func Me(w http.ResponseWriter, r *http.Request) {
 
 	var resp MeResponse
 	err = database.Database.QueryRow(
-		"SELECT nickname, email FROM users WHERE id = ?",
+		"SELECT nickname FROM users WHERE id = ?",
 		userID,
-	).Scan(&resp.Nickname, &resp.Email)
+	).Scan(&resp.Nickname)
 
 	if err != nil {
 		HandleError(w, http.StatusInternalServerError, "Server error")

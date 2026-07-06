@@ -8,7 +8,14 @@ export function router() {
   const path = location.pathname;
 
   const publicPaths = ['/login', '/register'];
+  const knownPaths = ['/', ...publicPaths];
   const auth = state.auth.authenticated;
+
+  if (!knownPaths.includes(path)) {
+    renderError(404);
+    return;
+  }
+
   if (!auth && !publicPaths.includes(path)) {
     navigateTo('/login');
     return;
@@ -20,8 +27,6 @@ export function router() {
     renderLogin();
   } else if (path === '/register') {
     renderRegister();
-  } else {
-    renderError(404);
   }
 }
 
