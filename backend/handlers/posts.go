@@ -32,6 +32,31 @@ func GetPostsAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	userID, _ := GetUserIDFromSession(r)
 
+	// ---- offset pagination params ----
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	if err != nil || limit <= 0 {
+		limit = 10
+	}
+	if limit > 50 {
+		limit = 50 // sane upper bound
+	}
+	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+	if err != nil || offset < 0 {
+		offset = 0
+	}
+
+	categories := r.URL.Query()["category"]
+	whereClause := ""
+	args := []interface{}{}
+	if len(categories) > 0 {
+		placeholders := strings.TrimSuffix(strings.Repeat("?,", len(categories)), ",")
+		whereClause = "WHERE c.name IN (" + placeholders + ")"
+		for _, cat := range categories {
+			args = append(args, cat)
+		}
+	}
+	args = append(args, limit, offset)
+
 	rows, err := database.Database.Query(`
 		SELECT
     p.id,
@@ -46,9 +71,11 @@ func GetPostsAPI(w http.ResponseWriter, r *http.Request) {
 		JOIN users u ON p.user_id = u.id
 		JOIN categories c ON p.category_id = c.id
 		LEFT JOIN post_reactions pr ON pr.post_id = p.id
+		`+whereClause+`
 		GROUP BY p.id
 		ORDER BY p.id DESC
-		`)
+		LIMIT ? OFFSET ?
+		`, args...)
 	if err != nil {
 		log.Printf("GetPostsAPI: %v", err)
 		HandleError(w, http.StatusInternalServerError, "Database error loading posts")
@@ -179,4 +206,4 @@ func CreatePostAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	RespondJSON(w, http.StatusCreated, map[string]string{"message": "Post created successfully!"})
-}
+}	

@@ -20,6 +20,7 @@ export function renderHome() {
             <label><input type="checkbox" value="Gaming"> Gaming</label>
             <label><input type="checkbox" value="Movies"> Movies</label>
             <label><input type="checkbox" value="Sports"> Sports</label>
+            <label><input type="checkbox" value="Anime"> Anime</label>
           </div>
           <button class="clear-btn" data-action="clear-filters">Clear Filters</button>
         </aside>

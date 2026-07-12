@@ -32,7 +32,8 @@ INSERT OR IGNORE INTO categories (id, name) VALUES
 (2, 'Programming'),
 (3, 'Gaming'),
 (4, 'Movies'),
-(5, 'Sports');
+(5, 'Sports'),
+(6, 'Anime');
 
 CREATE TABLE IF NOT EXISTS posts (
     id INTEGER PRIMARY KEY AUTOINCREMENT,

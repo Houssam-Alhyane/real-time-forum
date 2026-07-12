@@ -4,20 +4,27 @@ import { displayMessage } from './toast.js';
 import { escapeHTML, postCardHTML } from './utils.js';
 
 let allPosts = [];
-let visibleCount = 10;
 const PAGE_SIZE = 10;
+let offset = 0;
+let hasMore = true;
+let isLoading = false;
+let activeCategories = [];
 
-// ---------------- LOAD POSTS ----------------
+//  LOAD POSTS (first page)
 export async function loadPosts() {
   const container = document.getElementById('posts-container');
   if (!container) return;
 
-  visibleCount = PAGE_SIZE;
+  allPosts = [];
+  offset = 0;
+  hasMore = true;
+  activeCategories = getCheckedCategories();
 
   try {
-    const res = await fetch('/api/posts');
-    if (!res.ok) throw new Error('Failed to fetch posts');
-    allPosts = await res.json();
+    const page = await fetchPostsPage(0);
+    allPosts = page;
+    offset = page.length;
+    hasMore = page.length === PAGE_SIZE;
     renderPosts(allPosts);
   } catch (err) {
     console.error('loadPosts error:', err);
@@ -25,37 +32,54 @@ export async function loadPosts() {
   }
 }
 
-// ---------------- LOAD MORE ----------------
-export function loadMorePosts() {
-  visibleCount += PAGE_SIZE;
-  const source = getFilteredPosts();
-  renderPosts(source);
+//  LOAD MORE
+export async function loadMorePosts() {
+  if (isLoading || !hasMore) return;
+  isLoading = true;
+
+  try {
+    const page = await fetchPostsPage(offset);
+    allPosts.push(...page);
+    offset += page.length;
+    hasMore = page.length === PAGE_SIZE;
+    renderPosts(allPosts);
+  } catch (err) {
+    console.error('loadMorePosts error:', err);
+    displayMessage('Failed to load more posts', true);
+  } finally {
+    isLoading = false;
+  }
 }
 
-// ---------------- FILTER ----------------
-export function filterPosts() {
-  visibleCount = PAGE_SIZE;
-  renderPosts(getFilteredPosts());
+//  FETCH ONE PAGE
+async function fetchPostsPage(pageOffset) {
+  const params = new URLSearchParams({ limit: PAGE_SIZE, offset: pageOffset });
+  activeCategories.forEach((cat) => params.append('category', cat));
+
+  const res = await fetch(`/api/posts?${params.toString()}`);
+  if (!res.ok) throw new Error('Failed to fetch posts');
+  return res.json();
 }
 
-export function clearFilters() {
-  visibleCount = PAGE_SIZE;
+function getCheckedCategories() {
+  return Array.from(
+    document.querySelectorAll('.sidebar input[type=checkbox]:checked')
+  ).map((cb) => cb.value);
+}
+
+//FILTER
+export async function filterPosts() {
+  await loadPosts();
+}
+
+export async function clearFilters() {
   document
     .querySelectorAll('.sidebar input[type=checkbox]')
     .forEach((cb) => (cb.checked = false));
-  renderPosts(allPosts);
+  await loadPosts();
 }
 
-function getFilteredPosts() {
-  const checked = Array.from(
-    document.querySelectorAll('.sidebar input[type=checkbox]:checked')
-  ).map((cb) => cb.value);
-  return checked.length === 0
-    ? allPosts
-    : allPosts.filter((p) => checked.includes(p.category_name));
-}
-
-// ---------------- RENDER POSTS ----------------
+//  RENDER POSTS
 function renderPosts(posts) {
   const container = document.getElementById('posts-container');
   if (!container) return;
@@ -69,10 +93,7 @@ function renderPosts(posts) {
     return;
   }
 
-  const visible = posts.slice(0, visibleCount);
-  const hasMore = posts.length > visibleCount;
-
-  const cards = visible
+  const cards = posts
     .map(
       (p) => `
     <article class="post">
@@ -85,9 +106,7 @@ function renderPosts(posts) {
   const loadMoreBtn = hasMore
     ? `<div class="load-more-wrap">
         <button class="btn load-more-btn" data-action="load-more">
-          Load more <span class="load-more-count">(${
-            posts.length - visibleCount
-          } remaining)</span>
+          Load more
         </button>
        </div>`
     : '';
@@ -95,7 +114,7 @@ function renderPosts(posts) {
   container.innerHTML = `${createBtn}<div class="posts-list">${cards}</div>${loadMoreBtn}`;
 }
 
-// ---------------- CREATE POST FORM ----------------
+//  CREATE POST FORM
 export async function renderCreatePostForm() {
   const container = document.getElementById('posts-container');
   if (!container) return;
@@ -104,7 +123,6 @@ export async function renderCreatePostForm() {
     const res = await fetch('/api/categories');
     if (!res.ok) throw new Error('Failed to fetch categories');
     const categories = await res.json();
-    console.log(categories);
     const options = categories
       .map((c) => `<option value="${c.id}">${c.name}</option>`)
       .join('');
@@ -129,7 +147,7 @@ export async function renderCreatePostForm() {
   }
 }
 
-// ---------------- SUBMIT POST ----------------
+//  SUBMIT POST
 export async function submitPost() {
   const title = document.getElementById('post-title')?.value.trim();
   const content = document.getElementById('post-content')?.value.trim();
