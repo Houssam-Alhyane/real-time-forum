@@ -6,7 +6,7 @@ import (
 	"time"
 	"zone/backend/database"
 
-	"github.com/google/uuid"
+	"github.com/gofrs/uuid"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -56,8 +56,16 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// create new session
-		sessionID := uuid.New().String()
+	// create new session
+
+		sessionUUID, err := uuid.NewV4()
+		if err != nil {
+			HandleError(w, http.StatusInternalServerError, "Server error")
+			return
+		}
+
+		sessionID := sessionUUID.String()
+
 		expiration := time.Now().Add(24 * time.Hour)
 		_, err = database.Database.Exec(
 			"INSERT INTO sessions (id, expires_at, user_id) VALUES (?, ?, ?)",

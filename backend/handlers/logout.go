@@ -19,7 +19,6 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// If a session_token cookie is present, remove that session from
-	// the database so the token can't be reused even if it leaked.
 	cookie, err := r.Cookie("session_token")
 	if err != nil {
 		log.Printf("Logout: no session_token cookie on request: %v", err)
@@ -32,8 +31,7 @@ func Logout(w http.ResponseWriter, r *http.Request) {
 
 	expired := time.Unix(0, 0)
 
-	// Clear the HttpOnly session cookie. This MUST happen here —
-	// the frontend JS has no way to touch this cookie itself.
+
 	http.SetCookie(w, &http.Cookie{
 		Name:     "session_token",
 		Value:    "",

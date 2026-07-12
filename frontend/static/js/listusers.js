@@ -1,7 +1,7 @@
 import { state } from './state.js';
 import { escapeHTML } from './utils.js';
 
-// ---- sidebar shell --------------------------------------------------
+//  sidebar shell 
 
 export function renderChatSidebar() {
   return `
@@ -16,7 +16,7 @@ export function renderChatSidebar() {
     </aside>`;
 }
 
-// ---- sort -----------------------------------------------------------
+// sort
 
 function getSorted(users) {
   const withMsg = users
@@ -32,8 +32,7 @@ function getSorted(users) {
   return [...withMsg, ...withoutMsg];
 }
 
-// ---- render (exported so ws.js can call it on live updates) ---------
-
+//  render users
 export function renderUserList(users) {
   const list = document.getElementById('chat-user-list');
   const countEl = document.getElementById('chat-online-count');
