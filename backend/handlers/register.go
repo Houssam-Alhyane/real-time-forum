@@ -68,7 +68,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// 4. Email format validation
-		if !strings.Contains(user.Email, "@") || !strings.Contains(user.Email, ".") {
+		if !strings.Contains(user.Email, "@") || !strings.Contains(user.Email, ".")||len(user.Email)>50||len(user.Email)<4 {
 			HandleError(w, http.StatusBadRequest, "Invalid email address")
 			return
 		}
@@ -92,7 +92,7 @@ func Register(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// 8. Age restriction validation
-		if user.Age < 18 {
+		if user.Age < 18 ||user.Age>200{
 			HandleError(w, http.StatusBadRequest, "You must be at least 18 years old")
 			return
 		}

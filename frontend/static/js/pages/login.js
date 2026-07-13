@@ -16,7 +16,7 @@ export function renderLogin() {
     ${renderNavbar()}
     <div class="auth-shell">
       <h2>Login</h2>
-      <input id="login-id"   placeholder="Email or Nickname">
+      <input id="login-id" maxlength="50"  minlength="2"   placeholder="Email or Nickname">
       <input id="login-pass" type="password" placeholder="Password">
       <button type="button" data-action="login">Login</button>
     </div>`;
