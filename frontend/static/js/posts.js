@@ -124,17 +124,17 @@ export async function renderCreatePostForm() {
     if (!res.ok) throw new Error('Failed to fetch categories');
     const categories = await res.json();
     const options = categories
-      .map((c) => `<option value="${c.id}">${c.name}</option>`)
+      .map((c) => `<label><input type="checkbox" name="categories" value="${c.id}" /> ${c.name}</label>`)
       .join('');
 
     container.innerHTML = `
       <div class="create-post-form">
         <h3>Create a New Post</h3>
         <input id="post-title" placeholder="Post title" maxlength="200">
-        <select id="post-category">
-          <option value="">Select a category</option>
+        <div id="post-category">
+          <a>Select categories</a>
           ${options}
-        </select>
+        </div>
         <textarea id="post-content" placeholder="Write your post..." rows="5"></textarea>
         <div class="form-actions">
           <button type="button" class="btn primary" data-action="submit-post">Publish</button>
@@ -151,19 +151,25 @@ export async function renderCreatePostForm() {
 export async function submitPost() {
   const title = document.getElementById('post-title')?.value.trim();
   const content = document.getElementById('post-content')?.value.trim();
-  const categoryID = document.getElementById('post-category')?.value;
-
-  if (!title || !content || !categoryID) {
+  const categories = Array.from(
+    document.querySelectorAll('#post-category input[name="categories"]:checked')
+  ).map((cb) => cb.value);
+  if (!title || !content || categories.length === 0) {
     displayMessage('All fields are required', true);
     return;
   }
+  const data = new URLSearchParams();
+  data.append('title', title);
+  data.append('content', content);
+  categories.forEach((cat) => {
+    data.append('categories', cat);
+  });
 
   try {
     const res = await fetch('/api/posts/create', {
       method: 'POST',
-      body: new URLSearchParams({ title, content, categoryID }),
+      body: data,
     });
-
     await loadPosts();
     displayMessage('Post created successfully', false);
   } catch (err) {

@@ -48,26 +48,9 @@ function handle(msg) {
       renderUserList((msg.users || []).filter((u) => u.id !== state.auth.id));
       break;
 
-    case 'new_post':
-      prependPost(msg.post);
-      break;
-
     case 'session_kicked':
       disconnectWS();
       location.reload();
       break;
   }
-}
-
-//  new post
-
-function prependPost(post) {
-  if (!post) return;
-  const list = document.querySelector('.posts-list');
-  if (!list) return;
-
-  const card = document.createElement('article');
-  card.className = 'post';
-  card.innerHTML = postCardHTML(post);
-  list.prepend(card);
 }

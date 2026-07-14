@@ -1,10 +1,13 @@
 import { renderReactionBar } from './reactions.js';
 export function postCardHTML(p) {
+  const categoriesHtml = (p.categories || [])
+    .map(c => `<span class="category-tag">${escapeHTML(c)}</span>`)
+    .join(' ');
   return `
   <h3>author: ${escapeHTML(p.nickname)}</h3>
     <h3>${escapeHTML(p.title)}</h3>
     <p>${escapeHTML(p.content)}</p>
-    <span class="category-tag">${escapeHTML(p.category_name)}</span>
+    <div class="post-categories">${categoriesHtml}</div>
     ${renderReactionBar(p)}
   `;
 }

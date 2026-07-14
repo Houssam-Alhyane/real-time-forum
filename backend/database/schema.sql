@@ -17,7 +17,7 @@ CREATE TABLE IF NOT EXISTS sessions (
     id TEXT PRIMARY KEY UNIQUE,
     expires_at DATETIME NOT NULL,
     user_id INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
 
@@ -40,16 +40,22 @@ CREATE TABLE IF NOT EXISTS posts (
     title TEXT NOT NULL,
     content TEXT NOT NULL,
     user_id INTEGER NOT NULL,
-    category_id INTEGER NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-    FOREIGN KEY (category_id) REFERENCES categories(id) ON DELETE RESTRICT
+    FOREIGN KEY (user_id) REFERENCES users(id)
 );
 
-CREATE TABLE IF NOT EXISTS POST_REACTIONS (
+CREATE TABLE IF NOT EXISTS post_categories (
+    post_id INTEGER NOT NULL,
+    category_id INTEGER NOT NULL,
+    PRIMARY KEY (post_id, category_id),
+    FOREIGN KEY (post_id) REFERENCES posts(id),
+    FOREIGN KEY (category_id) REFERENCES categories(id)
+);
+
+CREATE TABLE IF NOT EXISTS post_reactions (
   user_id INTEGER NOT NULL,
   post_id INTEGER NOT NULL,
   is_like INTEGER NOT NULL DEFAULT 1,
   PRIMARY KEY (user_id, post_id),
-  FOREIGN KEY (user_id) REFERENCES USERS (id) ON DELETE CASCADE,
-  FOREIGN KEY (post_id) REFERENCES POSTS (id) ON DELETE CASCADE
+  FOREIGN KEY (user_id) REFERENCES users(id),
+  FOREIGN KEY (post_id) REFERENCES posts(id)
 );

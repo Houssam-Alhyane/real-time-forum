@@ -24,7 +24,6 @@ var (
 type wsMsg struct {
 	Type  string             `json:"type"`
 	Users []UserOnlineStatus `json:"users,omitempty"`
-	Post  PostResponse       `json:"post,omitempty"`
 }
 
 // ---- ServeWS --------------------------------------------------------
@@ -98,10 +97,7 @@ func broadcastUsers() {
 	broadcastAll(wsMsg{Type: "users", Users: users})
 }
 
-// BroadcastNewPost — called from CreatePostAPI after insert
-func BroadcastNewPost(post PostResponse) {
-	broadcastAll(wsMsg{Type: "new_post", Post: post})
-}
+
 
 // KickUser — sends session_kicked to a user's connection then closes it
 func KickUser(userID int) {

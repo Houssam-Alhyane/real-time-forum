@@ -13,26 +13,31 @@ type PostResponse struct {
 	Title        string `json:"title"`
 	Content      string `json:"content"`
 	UserID       int    `json:"user_id"`
-	Nickname     string `json:"nickname"`
-	CategoryName string `json:"category_name"`
-	LikeCount    int    `json:"like_count"`
-	DislikeCount int    `json:"dislike_count"`
-	UserReaction string `json:"user_reaction,omitempty"` // like | dislike | ""
+	Nickname     string   `json:"nickname"`
+	Categories   []string `json:"categories"`
+	LikeCount    int      `json:"like_count"`
+	DislikeCount int      `json:"dislike_count"`
+	UserReaction string   `json:"user_reaction,omitempty"` // like | dislike | ""
 }
 type CategoryResponse struct {
 	ID   int    `json:"id"`
 	Name string `json:"name"`
 }
 
-// fetch all posts when the page loads with like and deslik for all posts
+
+// It also checks if the user liked or disliked them GetPostsAPI fetches all posts to show on the page.
 func GetPostsAPI(w http.ResponseWriter, r *http.Request) {
+	// 1. Check if the request is a GET request. If not, return an error.
 	if r.Method != http.MethodGet {
 		HandleError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
+
+	// 2. See who is asking for the posts. If no one is logged in, userID is 0.
 	userID, _ := GetUserIDFromSession(r)
 
-	// ---- offset pagination params ----
+	// 3. Set up limits for pagination (how many posts to show at once).
+	// Default limit is 10 posts. Maximum is 50.
 	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
 	if err != nil || limit <= 0 {
 		limit = 10
@@ -40,23 +45,28 @@ func GetPostsAPI(w http.ResponseWriter, r *http.Request) {
 	if limit > 50 {
 		limit = 50 // sane upper bound
 	}
+
+	// Default offset is 0 (start from the first post).
 	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
 	if err != nil || offset < 0 {
 		offset = 0
 	}
 
+	// 4. Check if the user wants to filter by categories.
 	categories := r.URL.Query()["category"]
 	whereClause := ""
 	args := []interface{}{}
 	if len(categories) > 0 {
+		// If there are categories, create a filter for the database query.
 		placeholders := strings.TrimSuffix(strings.Repeat("?,", len(categories)), ",")
-		whereClause = "WHERE c.name IN (" + placeholders + ")"
+		whereClause = "WHERE EXISTS (SELECT * FROM post_categories pc3 JOIN categories c3 ON pc3.category_id = c3.id WHERE pc3.post_id = p.id AND c3.name IN (" + placeholders + "))"
 		for _, cat := range categories {
 			args = append(args, cat)
 		}
 	}
 	args = append(args, limit, offset)
 
+	// 5. Ask the database for the posts, their categories, and the total number of likes/dislikes.
 	rows, err := database.Database.Query(`
 		SELECT
     p.id,
@@ -64,12 +74,11 @@ func GetPostsAPI(w http.ResponseWriter, r *http.Request) {
     p.content,
     p.user_id,
     u.nickname,
-    c.name,
+    (SELECT GROUP_CONCAT(c2.name) FROM post_categories pc2 JOIN categories c2 ON pc2.category_id = c2.id WHERE pc2.post_id = p.id) AS categories,
     COALESCE(SUM(CASE WHEN pr.is_like = 1 THEN 1 ELSE 0 END), 0) AS like_count,
     COALESCE(SUM(CASE WHEN pr.is_like = 0 THEN 1 ELSE 0 END), 0) AS dislike_count
 		FROM posts p
 		JOIN users u ON p.user_id = u.id
-		JOIN categories c ON p.category_id = c.id
 		LEFT JOIN post_reactions pr ON pr.post_id = p.id
 		`+whereClause+`
 		GROUP BY p.id
@@ -83,16 +92,26 @@ func GetPostsAPI(w http.ResponseWriter, r *http.Request) {
 	}
 	defer rows.Close()
 
+	// 6. Read the posts from the database and put them in a list.
 	posts := []PostResponse{}
 	for rows.Next() {
 		var p PostResponse
-		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.UserID, &p.Nickname, &p.CategoryName,
+		var categoriesStr *string
+		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.UserID, &p.Nickname, &categoriesStr,
 			&p.LikeCount, &p.DislikeCount); err != nil {
 			continue
+		}
+		
+		// Convert comma-separated categories into an array.
+		if categoriesStr != nil && *categoriesStr != "" {
+			p.Categories = strings.Split(*categoriesStr, ",")
+		} else {
+			p.Categories = []string{}
 		}
 		posts = append(posts, p)
 	}
 
+	// 7. If the user is logged in, find out which posts they liked or disliked.
 	if userID != 0 {
 		reactRows, err := database.Database.Query(
 			"SELECT post_id, is_like FROM POST_REACTIONS WHERE user_id = ?", userID)
@@ -105,6 +124,8 @@ func GetPostsAPI(w http.ResponseWriter, r *http.Request) {
 					userReactions[postID] = isLike
 				}
 			}
+			
+			// Update each post with the user's reaction ("like" or "dislike").
 			for i := range posts {
 				if v, ok := userReactions[posts[i].ID]; ok {
 					if v == 1 {
@@ -117,6 +138,7 @@ func GetPostsAPI(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// 8. Send the final list of posts back to the web browser.
 	RespondJSON(w, http.StatusOK, posts)
 }
 
@@ -156,24 +178,24 @@ func CreatePostAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	err = r.ParseForm()
+	if err != nil {
+		HandleError(w, http.StatusBadRequest, "Invalid form data")
+		return
+	}
+
 	title := strings.TrimSpace(r.FormValue("title"))
 	content := strings.TrimSpace(r.FormValue("content"))
-	categoryIDStr := r.FormValue("categoryID")
+	categoryIDStrs := r.Form["categories"]
 
-	if title == "" || content == "" || categoryIDStr == "" {
+	if title == "" || content == "" || len(categoryIDStrs) == 0 {
 		HandleError(w, http.StatusBadRequest, "All fields are required")
 		return
 	}
 
-	categoryID, err := strconv.Atoi(categoryIDStr)
-	if err != nil {
-		HandleError(w, http.StatusBadRequest, "Invalid category selection")
-		return
-	}
-
 	result, err := database.Database.Exec(
-		"INSERT INTO posts (title, content, user_id, category_id) VALUES (?, ?, ?, ?)",
-		title, content, userID, categoryID,
+		"INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)",
+		title, content, userID,
 	)
 	if err != nil {
 		log.Printf("CreatePostAPI insert: %v", err)
@@ -181,28 +203,21 @@ func CreatePostAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// broadcast new post to all connected clients via WebSocket
 	postID, err := result.LastInsertId()
 	if err != nil {
 		HandleError(w, http.StatusInternalServerError, "Could not get new post ID")
 		return
 	}
-	var post PostResponse
-	err = database.Database.QueryRow(`
-		SELECT
-    p.id,
-    p.title,
-    p.content,
-    p.user_id,
-    u.nickname,
-    c.name
-		FROM posts p
-		JOIN users u ON p.user_id = u.id
-		JOIN categories c ON p.category_id = c.id
-		WHERE p.id = ?`, postID,
-	).Scan(&post.ID, &post.Title, &post.Content, &post.UserID, &post.Nickname, &post.CategoryName)
-	if err == nil {
-		BroadcastNewPost(post)
+
+	for _, catIDStr := range categoryIDStrs {
+		catID, err := strconv.Atoi(catIDStr)
+		if err != nil {
+			continue
+		}
+		_, err = database.Database.Exec("INSERT INTO post_categories (post_id, category_id) VALUES (?, ?)", postID, catID)
+		if err != nil {
+			log.Printf("Insert post_categories err: %v", err)
+		}
 	}
 
 	RespondJSON(w, http.StatusCreated, map[string]string{"message": "Post created successfully!"})
