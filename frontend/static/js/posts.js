@@ -124,7 +124,10 @@ export async function renderCreatePostForm() {
     if (!res.ok) throw new Error('Failed to fetch categories');
     const categories = await res.json();
     const options = categories
-      .map((c) => `<label><input type="checkbox" name="categories" value="${c.id}" /> ${c.name}</label>`)
+      .map(
+        (c) =>
+          `<label><input type="checkbox" name="categories" value="${c.id}" /> ${c.name}</label>`
+      )
       .join('');
 
     container.innerHTML = `
@@ -170,6 +173,11 @@ export async function submitPost() {
       method: 'POST',
       body: data,
     });
+    if (!res.ok) {
+      const error = await res.json();
+      displayMessage(error.error, true);
+      return;
+    }
     await loadPosts();
     displayMessage('Post created successfully', false);
   } catch (err) {

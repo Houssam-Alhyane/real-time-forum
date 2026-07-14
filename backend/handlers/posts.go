@@ -96,18 +96,21 @@ func GetPostsAPI(w http.ResponseWriter, r *http.Request) {
 	posts := []PostResponse{}
 	for rows.Next() {
 		var p PostResponse
-		var categoriesStr *string
-		if err := rows.Scan(&p.ID, &p.Title, &p.Content, &p.UserID, &p.Nickname, &categoriesStr,
-			&p.LikeCount, &p.DislikeCount); err != nil {
-			continue
-		}
-		
-		// Convert comma-separated categories into an array.
-		if categoriesStr != nil && *categoriesStr != "" {
-			p.Categories = strings.Split(*categoriesStr, ",")
-		} else {
-			p.Categories = []string{}
-		}
+var categoriesStr string
+
+if err := rows.Scan(
+    &p.ID,
+    &p.Title,
+    &p.Content,
+    &p.UserID,
+    &p.Nickname,
+    &categoriesStr,
+    &p.LikeCount,
+    &p.DislikeCount,
+); err != nil {
+    continue
+}
+p.Categories = strings.Split(categoriesStr, ",")
 		posts = append(posts, p)
 	}
 
@@ -192,7 +195,21 @@ func CreatePostAPI(w http.ResponseWriter, r *http.Request) {
 		HandleError(w, http.StatusBadRequest, "All fields are required")
 		return
 	}
+		validCategories := map[string]bool{
+    "1": true,
+    "2": true,
+    "3": true,
+    "4": true,
+    "5": true,
+    "6": true,
+		}
 
+			for _, cat := range categoryIDStrs {
+    if !validCategories[cat] {
+        HandleError(w, http.StatusBadRequest, "Invalid category")
+        return
+    }
+}
 	result, err := database.Database.Exec(
 		"INSERT INTO posts (title, content, user_id) VALUES (?, ?, ?)",
 		title, content, userID,
@@ -216,8 +233,9 @@ func CreatePostAPI(w http.ResponseWriter, r *http.Request) {
 		}
 		_, err = database.Database.Exec("INSERT INTO post_categories (post_id, category_id) VALUES (?, ?)", postID, catID)
 		if err != nil {
-			log.Printf("Insert post_categories err: %v", err)
-		}
+			HandleError(w, http.StatusBadRequest, "Invalid category")
+			return	
+			}
 	}
 
 	RespondJSON(w, http.StatusCreated, map[string]string{"message": "Post created successfully!"})
