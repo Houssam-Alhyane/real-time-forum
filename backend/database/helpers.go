@@ -12,3 +12,27 @@ func UpdateLastSeen(userID int) {
 		log.Println("UpdateLastSeen:", err)
 	}
 }
+
+// DoesPostExist checks if a post with the given ID exists in the database.
+func DoesPostExist(postID int) (bool, error) {
+	var exists bool
+	err := Database.QueryRow(
+		"SELECT EXISTS(SELECT 1 FROM posts WHERE id = ?)", postID,
+	).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+// CreateComment inserts a new comment into the database
+func CreateComment(postID, userID int, content string) error {
+	_, err := Database.Exec(
+		"INSERT INTO comments (post_id, user_id, content) VALUES (?, ?, ?)",
+		postID, userID, content,
+	)
+	if err != nil {
+		return err
+	}
+	return nil
+}

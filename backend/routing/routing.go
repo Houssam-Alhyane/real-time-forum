@@ -38,6 +38,8 @@ func RegisterRout() {
 
 	http.HandleFunc("/api/posts/react", limiter.Middleware(middlewares.Auth(handlers.ReactToPost)))
 
+	http.HandleFunc("/api/posts/comment", limiter.Middleware(middlewares.Auth(handlers.CreateCommentAPI)))
+	http.HandleFunc("/api/posts/comments", limiter.Middleware(middlewares.Auth(handlers.GetCommentsAPI)))
 	// Public
 	http.HandleFunc("/api/posts", limiter.Middleware(middlewares.Auth(handlers.GetPostsAPI)))
 	http.HandleFunc("/api/categories", limiter.Middleware(handlers.GetCategoriesAPI))
