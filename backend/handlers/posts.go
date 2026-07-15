@@ -195,6 +195,10 @@ func CreatePostAPI(w http.ResponseWriter, r *http.Request) {
 		HandleError(w, http.StatusBadRequest, "All fields are required")
 		return
 	}
+	if len(title)>200||len(content)>2000{
+		HandleError(w, http.StatusBadRequest, "title or contant to long")
+		return
+	}
 		validCategories := map[string]bool{
     "1": true,
     "2": true,

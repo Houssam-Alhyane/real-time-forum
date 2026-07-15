@@ -138,7 +138,7 @@ export async function renderCreatePostForm() {
           <a>Select categories</a>
           ${options}
         </div>
-        <textarea id="post-content" placeholder="Write your post..." rows="5"></textarea>
+        <textarea id="post-content" placeholder="Write your post..." maxlength="2000" rows="5"></textarea>
         <div class="form-actions">
           <button type="button" class="btn primary" data-action="submit-post">Publish</button>
           <button type="button" class="btn" data-action="load-posts">Cancel</button>
