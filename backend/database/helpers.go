@@ -1,6 +1,9 @@
 package database
 
-import "log"
+import (
+	"log"
+	"zone/backend/types"
+)
 
 // UpdateLastSeen updates the last_seen timestamp for the given user.
 // Shared by handlers (login) and middleware (auth).
@@ -35,4 +38,39 @@ func CreateComment(postID, userID int, content string) error {
 		return err
 	}
 	return nil
+}
+
+// GetComments retrieves comments for a specific post with pagination along with the commenter's nickname and the creation timestamp.
+func GetComments(postID, limit, offset int) ([]types.Comment, error) {
+	// Query the database
+	rows, err := Database.Query(
+		`SELECT u.nickname, c.content, c.created_at
+		FROM comments c
+		JOIN users u ON c.user_id = u.id
+		WHERE c.post_id = ?
+		ORDER BY c.created_at DESC
+		LIMIT ? OFFSET ?`, postID, limit, offset,
+	)
+	// Handle any errors that occur during the query
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	// Iterate through the result set and populate the comments slice
+	var comments []types.Comment
+	for rows.Next() {
+		var comment types.Comment
+		if err := rows.Scan(&comment.Nickname, &comment.Content, &comment.CreatedAt); err != nil {
+			return nil, err
+		}
+		comments = append(comments, comment)
+	}
+
+	// Check for any errors that occurred during iteration
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return comments, nil
 }

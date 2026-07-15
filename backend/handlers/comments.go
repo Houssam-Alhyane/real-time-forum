@@ -4,16 +4,53 @@ import (
 	"net/http"
 	"strconv"
 	"zone/backend/database"
+	"zone/backend/types"
 )
 
-type CommentPayload struct {
-	PostID  int    `json:"post_id"`
-	Content string `json:"content"`
-	UserID  int    `json:"user_id"`
-}
+
+
 
 // GetCommentsAPI fetches comments with pagination for a specific post.
 func GetCommentsAPI(w http.ResponseWriter, r *http.Request) {
+	// Method Check: Restrict the request method to GET
+	if r.Method != http.MethodGet {
+		HandleError(w, http.StatusMethodNotAllowed, "Method not allowed")
+		return
+	}
+
+	// Extract Post ID: Parse the post_id from the URL query parameters
+	postID, err := strconv.Atoi(r.URL.Query().Get("post_id"))
+	if err != nil || postID <= 0 {
+		HandleError(w, http.StatusBadRequest, "Invalid post_id")
+		return
+	}
+
+	// Handle Pagination: parse limit and offset from query parameters, with defaults
+	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
+	if err != nil || limit <= 0 {
+		limit = 10 // default limit
+	}
+	if limit > 50 {
+		limit = 50 // sane upper bound
+	}
+
+	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
+	if err != nil || offset < 0 {
+		offset = 0 // default offset
+	}
+
+	// Database Query: Fetch comments from the database with nickname, content, and created_at for the specified post_id 
+	comments, err := database.GetComments(postID, limit, offset)
+
+	// failed to fetch comments from the database
+	if err != nil {
+		HandleError(w, http.StatusInternalServerError, "Database error")
+		return
+	}
+
+	// successful response with comments in JSON format
+	response := types.CommentsResponse{Comments: comments}
+	RespondJSON(w, http.StatusOK, response)
 }
 
 // CreateCommentAPI handles the creation of a new comment for a specific post.
@@ -25,16 +62,16 @@ func CreateCommentAPI(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check authentication
-	payload := CommentPayload{}
+	payload := types.CommentPayload{}
 	userID, err := GetUserIDFromSession(r)
 	if err != nil || userID == 0 {
 		HandleError(w, http.StatusUnauthorized, "Unauthorized")
 		return
 	}
 	payload.UserID = userID
-	// Parse Payload: Read post_id and content from the request
+
+	// Parse Payload: Read post_id and content from the request and validate them
 	payload.PostID, err = strconv.Atoi(r.FormValue("post_id"))
-	// validate post_id and content
 	if err != nil || payload.PostID <= 0 {
 		HandleError(w, http.StatusBadRequest, "Invalid post_id")
 		return
@@ -58,6 +95,7 @@ func CreateCommentAPI(w http.ResponseWriter, r *http.Request) {
 
 	// Database Insert: Execute the insert query
 	err = database.CreateComment(payload.PostID, payload.UserID, payload.Content)
+
 	// failed to insert comment into the database
 	if err != nil {
 		HandleError(w, http.StatusInternalServerError, "Database error")
