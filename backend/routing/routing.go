@@ -2,14 +2,17 @@ package routing
 
 import (
 	"net/http"
+	"time"
 	"zone/backend/handlers"
 	middlewares "zone/backend/middleware"
 )
 
 func RegisterRout() {
+	limiter := middlewares.NewRateLimiter(60, time.Second*3) // 60 requests per 3 seconds
+
 	// Auth routes
 	//main rout
-		http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+	http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		if len(r.URL.Path) >= 4 && r.URL.Path[:4] == "/api" {
 			w.Header().Set("Content-Type", "application/json")
 			w.WriteHeader(http.StatusNotFound)
@@ -20,25 +23,25 @@ func RegisterRout() {
 		http.ServeFile(w, r, "./frontend/index.html")
 	})
 	// Static files
-		http.HandleFunc("/static/", handlers.HandleStatic)
+	http.HandleFunc("/static/", handlers.HandleStatic)
 	// Public
-	http.HandleFunc("/register", handlers.Register)
-	http.HandleFunc("/login", handlers.Login)
+	http.HandleFunc("/register", limiter.Middleware(handlers.Register))
+	http.HandleFunc("/login", limiter.Middleware(handlers.Login))
 
 	// Protected
-	http.HandleFunc("/logout", middlewares.Auth(handlers.Logout))
+	http.HandleFunc("/logout", limiter.Middleware(middlewares.Auth(handlers.Logout)))
 
 	// API routes
-	http.HandleFunc("/api/me", handlers.Me)
+	http.HandleFunc("/api/me", limiter.Middleware(handlers.Me))
 
-	http.HandleFunc("/api/users", middlewares.Auth(handlers.GetUsersAPI))
+	http.HandleFunc("/api/users", limiter.Middleware(middlewares.Auth(handlers.GetUsersAPI)))
 
-	http.HandleFunc("/api/posts/create", middlewares.Auth(handlers.CreatePostAPI))
+	http.HandleFunc("/api/posts/create", limiter.Middleware(middlewares.Auth(handlers.CreatePostAPI)))
 
-	http.HandleFunc("/api/posts/react", middlewares.Auth(handlers.ReactToPost))
+	http.HandleFunc("/api/posts/react", limiter.Middleware(middlewares.Auth(handlers.ReactToPost)))
 
 	// Public
-	http.HandleFunc("/api/posts",middlewares.Auth( handlers.GetPostsAPI))
-	http.HandleFunc("/api/categories", middlewares.Auth(handlers.GetCategoriesAPI))
-	http.HandleFunc("/ws", handlers.ServeWS)
+	http.HandleFunc("/api/posts", limiter.Middleware(middlewares.Auth(handlers.GetPostsAPI)))
+	http.HandleFunc("/api/categories", limiter.Middleware(handlers.GetCategoriesAPI))
+	http.HandleFunc("/ws", limiter.Middleware(handlers.ServeWS))
 }
