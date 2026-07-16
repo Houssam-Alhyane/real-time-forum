@@ -28,8 +28,10 @@ export async function fetchPostAndComments(postId) {
       throw new Error('Failed to fetch post or comments');
     }
 
-    const post = await postResponse.json();
-    const commentsData = await commentsResponse.json();
+    const [post, commentsData] = await Promise.all([
+      postResponse.json(),
+      commentsResponse.json(),
+    ]);
     const allComments = commentsData.comments || [];
 
     hasMore = allComments.length > pageSize;
