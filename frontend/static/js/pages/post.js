@@ -9,6 +9,9 @@ export function renderPostPage(postId) {
   // inject the navbar and post container into the app
   app.innerHTML = `
         ${renderNavbar()}
+        <div id="post-back-wrap">
+          <button class="btn post-back-btn" data-action="nav" data-target="/">&larr; Back to Posts</button>
+        </div>
         <div id="post-container"></div>
         <div id="comments-container"></div>
         ${

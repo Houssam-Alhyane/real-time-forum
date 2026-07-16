@@ -18,7 +18,8 @@ export async function reactToPost(postId, type) {
   }
 }
 
-export function renderReactionBar(post) {
+export function renderReactionBar(post, options = {}) {
+  const { showCommentLink = true } = options;
   const liked = post.user_reaction === 'like';
   const disliked = post.user_reaction === 'dislike';
   return `
@@ -35,12 +36,22 @@ export function renderReactionBar(post) {
               }" data-reaction-type="dislike">
         👎 <span class="dislike-count">${post.dislike_count}</span>
       </button>
+      ${
+        showCommentLink
+          ? `<button class="react-btn comment-link-btn"
+              data-action="view-post"
+              data-post-id="${post.id}"
+              aria-label="Open comments">
+        💬
+      </button>`
+          : ''
+      }
     </div>`;
 }
 
 function updateReactionUI(postId, data) {
   const bar = document.querySelector(
-    `.post-reactions[data-post-id="${postId}"]`
+    `.post-reactions[data-post-id="${postId}"]`,
   );
   if (!bar) return;
 

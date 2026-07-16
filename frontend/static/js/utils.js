@@ -1,5 +1,5 @@
 import { renderReactionBar } from './reactions.js';
-export function postCardHTML(p) {
+export function postCardHTML(p, options = {}) {
   const categoriesHtml = (p.categories || [])
     .map((c) => `<span class="category-tag">${escapeHTML(c)}</span>`)
     .join(' ');
@@ -8,7 +8,7 @@ export function postCardHTML(p) {
     <h3>${escapeHTML(p.title)}</h3>
     <p>${escapeHTML(p.content)}</p>
     <div class="post-categories">${categoriesHtml}</div>
-    ${renderReactionBar(p)}
+    ${renderReactionBar(p, options)}
   `;
 }
 

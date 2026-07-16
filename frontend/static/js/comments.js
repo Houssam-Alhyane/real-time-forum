@@ -38,7 +38,9 @@ export async function fetchPostAndComments(postId) {
 
     const postContainer = document.getElementById('post-container');
     if (postContainer) {
-      postContainer.innerHTML = `<article class="post">${postCardHTML(post)}</article>`;
+      postContainer.innerHTML = `<article class="post">${postCardHTML(post, {
+        showCommentLink: false,
+      })}</article>`;
     }
 
     renderComments(comments, false);

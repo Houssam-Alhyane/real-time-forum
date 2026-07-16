@@ -557,6 +557,13 @@ button:focus-visible,
   color: inherit;
 }
 
+.comment-link-btn {
+  padding: 0.4rem 0.55rem;
+  min-width: 36px;
+  font-size: 0.9rem;
+  line-height: 1;
+}
+
 /* active (user's current reaction) */
 .react-btn.like-btn.active {
   border-color: var(--success);
@@ -593,6 +600,7 @@ button:focus-visible,
 /* ============================================================
    SINGLE POST PAGE + COMMENTS
    ============================================================ */
+#post-back-wrap,
 #post-container,
 #comments-container,
 #comment-form-container,
@@ -600,6 +608,22 @@ button:focus-visible,
   width: min(900px, calc(100% - 2.5rem));
   margin-left: auto;
   margin-right: auto;
+}
+
+#post-back-wrap {
+  padding-top: 1.1rem;
+}
+
+.post-back-btn {
+  background: var(--success-soft);
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.post-back-btn:hover {
+  background: rgba(62, 207, 142, 0.2);
+  border-color: var(--success);
+  color: #8cf2c2;
 }
 
 #post-container {
@@ -1510,6 +1534,7 @@ button:focus-visible,
     padding: 1.25rem 1rem;
   }
 
+  #post-back-wrap,
   #post-container,
   #comments-container,
   #comment-form-container,
