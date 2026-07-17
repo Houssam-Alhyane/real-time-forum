@@ -9,13 +9,13 @@ This document lists the ordered subtasks for Epic 1 (Real-Time Private Messaging
 - Modify: backend/database/helpers.go — add queries for message insertion, retrieval, and user status updates.
 - Modify: backend/types/types.go — add structs for WebSocket payloads and message data.
 
-2. WebSocket Connection Management
+2. WebSocket Connection Management : finished
 
 - Goal: Establish WebSocket upgrade handling and maintain a client registry mapping each authenticated user to multiple concurrent connections (multi-tab support).
 - Modify: backend/routing/routing.go — register the WebSocket endpoint (e.g., `/ws`).
 - Create: backend/handlers/websocket.go — implement connection upgrade, multi-tab client registry (map[userID][]\*websocket.Conn), and read/write pumps.
 
-3. User List & Status Broadcast
+3. User List & Status Broadcast : finished
 
 - Goal: Retrieve online/offline user list, sort by recent activity, and broadcast status changes to connected clients.
 - Modify: backend/handlers/websocket.go — add broadcast logic for user status events.

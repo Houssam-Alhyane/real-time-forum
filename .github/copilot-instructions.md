@@ -13,6 +13,7 @@ Your role is **Execution Only**. You will be fed specific, atomic subtasks based
 ## 💻 Coding Standards
 
 - Write clean, simple, and self-documenting code.
+- Write clean, simple comments.
 - Always include type hints (if the language supports them).
 - Prioritize readability over "clever" one-liners.
 - If an existing pattern is established in the codebase (e.g., error handling, logging), match it exactly.

@@ -40,3 +40,13 @@ type Message struct {
 	CreatedAt      string `json:"created_at"`
 	SenderNickname string `json:"sender_nickname"`
 }
+
+type UserStatus struct {
+	UserID   int    `json:"user_id"`
+	Nickname string `json:"nickname"`
+	LastSeen string `json:"last_seen"`
+}
+
+// WebSocketPayload.Type values used by the server:
+// - "user_online": a user came online (first tab connected)
+// - "user_offline": a user went fully offline (last tab disconnected)

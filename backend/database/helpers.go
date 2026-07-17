@@ -1,5 +1,8 @@
 package database
 
+// Database helper additions for presence and messaging.
+// Includes GetUsersByLastSeen which returns users ordered by recent activity (last_seen).
+
 import (
 	"log"
 	"zone/backend/types"
@@ -15,6 +18,34 @@ func UpdateLastSeen(userID int) {
 	if err != nil {
 		log.Println("UpdateLastSeen:", err)
 	}
+}
+
+// GetUsersByLastSeen returns users sorted by recent activity.
+func GetUsersByLastSeen() ([]types.UserStatus, error) {
+	rows, err := Database.Query(
+		`SELECT id, nickname, last_seen
+		FROM users
+		ORDER BY last_seen DESC, nickname ASC`,
+	)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var users []types.UserStatus
+	for rows.Next() {
+		var user types.UserStatus
+		if err := rows.Scan(&user.UserID, &user.Nickname, &user.LastSeen); err != nil {
+			return nil, err
+		}
+		users = append(users, user)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return users, nil
 }
 
 // InsertMessage stores a private message in the database and updates user activity.

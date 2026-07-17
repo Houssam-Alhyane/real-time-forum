@@ -1,17 +1,39 @@
 package handlers
 
+// WebSocket connection manager and status broadcaster
+//
+// Implements:
+// - HTTP -> WebSocket upgrade for authenticated users
+// - per-user multi-tab connection registry (map[userID][]*wsClient)
+// - simple read/write pumps (connection lifecycle, pings)
+// - broadcast of user_online/user_offline events to connected clients
+
 import (
 	"log"
 	"net/http"
 	"sync"
 	"time"
 
+	"zone/backend/types"
+
 	"github.com/gorilla/websocket"
 )
 
+type wsClient struct {
+	conn *websocket.Conn
+	mu   sync.Mutex
+}
+
+func (c *wsClient) sendJSON(v interface{}) error {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	err := c.conn.WriteJSON(v)
+	return err
+}
+
 var (
 	clientsMu sync.Mutex
-	clients   = make(map[int][]*websocket.Conn)
+	clients   = make(map[int][]*wsClient)
 )
 
 var upgrader = websocket.Upgrader{
@@ -33,20 +55,26 @@ func HandleWebSocket(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	ws := &wsClient{conn: conn}
 	clientsMu.Lock()
-	clients[userID] = append(clients[userID], conn)
+	connected := len(clients[userID]) > 0
+	clients[userID] = append(clients[userID], ws)
 	clientsMu.Unlock()
 
-	go readPump(userID, conn)
-	go writePump(userID, conn)
+	if !connected {
+		broadcastStatusChange(userID, "user_online")
+	}
+
+	go readPump(userID, ws)
+	go writePump(userID, ws)
 }
 
 // readPump listens for incoming WebSocket messages and keeps the connection alive until it closes.
-func readPump(userID int, conn *websocket.Conn) {
-	defer cleanupConnection(userID, conn)
+func readPump(userID int, client *wsClient) {
+	defer cleanupConnection(userID, client)
 
 	for {
-		_, _, err := conn.ReadMessage()
+		_, _, err := client.conn.ReadMessage()
 		if err != nil {
 			return
 		}
@@ -54,11 +82,14 @@ func readPump(userID int, conn *websocket.Conn) {
 }
 
 // writePump sends periodic WebSocket ping frames and detects when the connection is no longer available.
-func writePump(userID int, conn *websocket.Conn) {
-	defer cleanupConnection(userID, conn)
+func writePump(userID int, client *wsClient) {
+	defer cleanupConnection(userID, client)
 
 	for {
-		if err := conn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(time.Second)); err != nil {
+		client.mu.Lock()
+		err := client.conn.WriteControl(websocket.PingMessage, []byte{}, time.Now().Add(time.Second))
+		client.mu.Unlock()
+		if err != nil {
 			return
 		}
 		time.Sleep(30 * time.Second)
@@ -66,28 +97,50 @@ func writePump(userID int, conn *websocket.Conn) {
 }
 
 // cleanupConnection removes the WebSocket from the client registry and closes the connection.
-func cleanupConnection(userID int, conn *websocket.Conn) {
-	removeClient(userID, conn)
-	conn.Close()
+func cleanupConnection(userID int, client *wsClient) {
+	last := removeClient(userID, client)
+	client.conn.Close()
+	if last {
+		broadcastStatusChange(userID, "user_offline")
+	}
+}
+
+// broadcastStatusChange sends an online/offline event to every connected client.
+func broadcastStatusChange(userID int, status string) {
+	payload := types.WebSocketPayload{Type: status, UserID: userID}
+
+	clientsMu.Lock()
+	allClients := make([]*wsClient, 0)
+	for _, conns := range clients {
+		allClients = append(allClients, conns...)
+	}
+	clientsMu.Unlock()
+
+	for _, c := range allClients {
+		if err := c.sendJSON(payload); err != nil {
+			log.Println("broadcastStatusChange:", err)
+		}
+	}
 }
 
 // removeClient removes a closed connection from the user's list of active WebSocket connections.
-func removeClient(userID int, conn *websocket.Conn) {
+func removeClient(userID int, client *wsClient) bool {
 	clientsMu.Lock()
 	defer clientsMu.Unlock()
 
 	conns := clients[userID]
-	filtered := make([]*websocket.Conn, 0, len(conns))
+	filtered := make([]*wsClient, 0, len(conns))
 	for _, existing := range conns {
-		if existing != conn {
+		if existing != client {
 			filtered = append(filtered, existing)
 		}
 	}
 
 	if len(filtered) == 0 {
 		delete(clients, userID)
-		return
+		return true
 	}
 
 	clients[userID] = filtered
+	return false
 }
