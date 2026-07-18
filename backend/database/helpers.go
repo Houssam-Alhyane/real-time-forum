@@ -62,11 +62,28 @@ func InsertMessage(senderID, receiverID int, content string) (int, error) {
 	if err != nil {
 		return 0, err
 	}
-
+	// Update the sender's last seen timestamp.
 	UpdateLastSeen(senderID)
-	UpdateLastSeen(receiverID)
 
 	return int(messageID), nil
+}
+
+// GetMessageByID returns one private message with sender nickname.
+func GetMessageByID(messageID int) (types.Message, error) {
+	row := Database.QueryRow(
+		`SELECT m.id, m.sender_id, m.receiver_id, m.content, m.created_at, u.nickname
+		FROM messages m
+		JOIN users u ON u.id = m.sender_id
+		WHERE m.id = ?`,
+		messageID,
+	)
+
+	var message types.Message
+	if err := row.Scan(&message.ID, &message.SenderID, &message.ReceiverID, &message.Content, &message.CreatedAt, &message.SenderNickname); err != nil {
+		return types.Message{}, err
+	}
+
+	return message, nil
 }
 
 // GetMessages retrieves private messages between two users with pagination.
