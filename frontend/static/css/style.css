@@ -292,10 +292,7 @@ button:focus-visible,
 }
 
 .container.chat-open {
-  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr) minmax(
-      380px,
-      460px
-    );
+  grid-template-columns: minmax(240px, 280px) minmax(0, 1fr);
 }
 
 /* ============================================================
@@ -1287,7 +1284,7 @@ button:focus-visible,
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: 400px;
+  width: min(400px, calc(100vw - 40px)); /* Responsive width */
   height: 420px; /* Height for approximately 7 visible messages */
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -1295,7 +1292,7 @@ button:focus-visible,
   overflow: hidden;
   box-shadow: var(--shadow-md);
   animation: post-in 0.25s var(--ease);
-  z-index: 1000;
+  z-index: 9999; /* Higher z-index to make it independent from other elements */
 }
 
 /* ---- Chat panel (fills the dock) ---- */
@@ -1519,22 +1516,34 @@ button:focus-visible,
     right: 20px;
     width: min(400px, calc(100vw - 40px));
     height: 420px; /* Height for approximately 7 visible messages */
-    z-index: 1000;
+    z-index: 9999;
     box-shadow: var(--shadow-lg);
   }
 }
 
-@media (max-width: 720px) {
-  .container {
-    grid-template-columns: 1fr;
-    padding: 1.25rem 1rem;
+/* Default styles for larger screens - chat dock has fixed width */
+.chat-panel-dock.open {
+  width: min(400px, calc(100vw - 40px)); /* Same as tablet screens */
+}
+
+@media (max-width: 768px) {
+  .chat-panel-dock.open {
+    width: calc(100vw - 20px);
+    height: 320px;
+    right: 10px;
+    left: 10px;
+    bottom: 10px;
   }
 
-  #post-back-wrap,
-  #post-container,
-  #comments-container,
-  #comment-form-container,
-  #comments-load-more-wrap {
+  /* Prevent chat dock from interfering with main page content on small screens */
+  .container.chat-open {
+    padding-bottom: 340px; /* Make space for chat dock */
+  }
+  
+  /* Ensure main layout stays in mobile mode when chat is open */
+  .container.chat-open {
+    grid-template-columns: 1fr; /* Force single column layout */
+  }
     width: calc(100% - 1.5rem);
   }
 
@@ -1604,14 +1613,20 @@ button:focus-visible,
     max-height: 260px;
   }
 
+@media (max-width: 768px) {
   .chat-panel-dock.open {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    left: 0.5rem;
-    width: calc(100vw - 40px);
-    height: 420px; /* Height for approximately 7 visible messages */
+    width: calc(100vw - 20px);
+    height: 320px;
+    right: 10px;
+    left: 10px;
+    bottom: 10px;
   }
+  
+  /* Prevent chat dock from interfering with main page content on small screens */
+  .container.chat-open {
+    padding-bottom: 340px; /* Make space for chat dock */
+  }
+}
 }
 
 @media (max-width: 420px) {
