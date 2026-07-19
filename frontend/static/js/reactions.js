@@ -64,3 +64,34 @@ function updateReactionUI(postId, data) {
     .querySelector('.dislike-btn')
     .classList.toggle('active', data.user_reaction === 'dislike');
 }
+
+export async function reactToComment(commentId, type) {
+  try {
+    const res = await fetch('/api/posts/comment/react', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ comment_id: commentId, type }),
+    });
+    const data = await res.json();
+    updateCommentReactionUI(commentId, data);
+  } catch (err) {
+    console.error('reactToComment error:', err);
+    displayMessage('Network error. Please try again.', true);
+  }
+}
+
+function updateCommentReactionUI(commentId, data) {
+  const bar = document.querySelector(
+    `.comment-reactions[data-comment-id="${commentId}"]`,
+  );
+  if (!bar) return;
+
+  bar.querySelector('.like-count').textContent = data.like_count;
+  bar.querySelector('.dislike-count').textContent = data.dislike_count;
+  bar
+    .querySelector('.like-btn')
+    .classList.toggle('active', data.user_reaction === 'like');
+  bar
+    .querySelector('.dislike-btn')
+    .classList.toggle('active', data.user_reaction === 'dislike');
+}

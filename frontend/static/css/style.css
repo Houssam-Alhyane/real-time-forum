@@ -689,6 +689,71 @@ button:focus-visible,
   word-break: break-word;
 }
 
+.comment-reactions {
+  display: flex;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid var(--border);
+}
+
+.react-btn-sm {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 0.25rem 0.6rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-pill);
+  color: var(--text-secondary);
+  font-family: var(--sans);
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.15s var(--ease),
+    border-color 0.15s var(--ease),
+    color 0.15s var(--ease),
+    transform 0.1s var(--ease);
+}
+
+.react-btn-sm:hover {
+  border-color: var(--border-hover);
+  color: var(--text-primary);
+  background: var(--bg-hover);
+}
+
+.react-btn-sm:active {
+  transform: scale(0.94);
+}
+
+.react-btn-sm .like-count,
+.react-btn-sm .dislike-count {
+  font-family: var(--mono);
+  font-weight: 600;
+  color: inherit;
+}
+
+.react-btn-sm.like-btn.active {
+  border-color: var(--success);
+  color: var(--success);
+  background: var(--success-soft);
+}
+.react-btn-sm.like-btn.active:hover {
+  border-color: var(--success);
+  color: var(--success);
+}
+
+.react-btn-sm.dislike-btn.active {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-soft);
+}
+.react-btn-sm.dislike-btn.active:hover {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
 .no-comments {
   text-align: center;
   padding: 1.3rem 1rem;

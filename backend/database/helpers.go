@@ -4,6 +4,7 @@ package database
 // Includes GetUsersByLastSeen which returns users ordered by recent activity (last_seen).
 
 import (
+	"database/sql"
 	"log"
 	"zone/backend/types"
 )
@@ -148,36 +149,97 @@ func CreateComment(postID, userID int, content string) error {
 }
 
 // GetComments retrieves comments for a specific post with pagination along with the commenter's nickname and the creation timestamp.
-func GetComments(postID, limit, offset int) ([]types.Comment, error) {
-	// Query the database
+func GetComments(postID, userID, limit, offset int) ([]types.Comment, error) {
 	rows, err := Database.Query(
-		`SELECT u.nickname, c.content, c.created_at
+		`SELECT c.id, u.nickname, c.content, c.created_at,
+			COALESCE(cr_counts.like_count, 0),
+			COALESCE(cr_counts.dislike_count, 0),
+			COALESCE(cr_user.is_like, -1)
 		FROM comments c
 		JOIN users u ON c.user_id = u.id
+		LEFT JOIN (
+			SELECT comment_id,
+				SUM(CASE WHEN is_like = 1 THEN 1 ELSE 0 END) AS like_count,
+				SUM(CASE WHEN is_like = 0 THEN 1 ELSE 0 END) AS dislike_count
+			FROM comment_reactions
+			GROUP BY comment_id
+		) cr_counts ON cr_counts.comment_id = c.id
+		LEFT JOIN comment_reactions cr_user ON cr_user.comment_id = c.id AND cr_user.user_id = ?
 		WHERE c.post_id = ?
 		ORDER BY c.created_at DESC
-		LIMIT ? OFFSET ?`, postID, limit, offset,
+		LIMIT ? OFFSET ?`, userID, postID, limit, offset,
 	)
-	// Handle any errors that occur during the query
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	// Iterate through the result set and populate the comments slice
 	var comments []types.Comment
 	for rows.Next() {
 		var comment types.Comment
-		if err := rows.Scan(&comment.Nickname, &comment.Content, &comment.CreatedAt); err != nil {
+		var userReaction int
+		if err := rows.Scan(&comment.ID, &comment.Nickname, &comment.Content, &comment.CreatedAt, &comment.LikeCount, &comment.DislikeCount, &userReaction); err != nil {
 			return nil, err
+		}
+		if userReaction == 1 {
+			comment.UserReaction = "like"
+		} else if userReaction == 0 {
+			comment.UserReaction = "dislike"
+		} else {
+			comment.UserReaction = ""
 		}
 		comments = append(comments, comment)
 	}
 
-	// Check for any errors that occurred during iteration
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
 
 	return comments, nil
+}
+
+// DoesCommentExist checks if a comment with the given ID exists.
+func DoesCommentExist(commentID int) (bool, error) {
+	var exists bool
+	err := Database.QueryRow(
+		"SELECT EXISTS(SELECT 1 FROM comments WHERE id = ?)", commentID,
+	).Scan(&exists)
+	if err != nil {
+		return false, err
+	}
+	return exists, nil
+}
+
+// GetCommentReactionSummary returns like/dislike counts and the user's reaction for a comment.
+func GetCommentReactionSummary(commentID, userID int) (types.CommentReactResponse, error) {
+	var resp types.CommentReactResponse
+
+	err := Database.QueryRow(`
+		SELECT
+			COALESCE(SUM(CASE WHEN is_like = 1 THEN 1 ELSE 0 END), 0),
+			COALESCE(SUM(CASE WHEN is_like = 0 THEN 1 ELSE 0 END), 0)
+		FROM comment_reactions WHERE comment_id = ?`,
+		commentID,
+	).Scan(&resp.LikeCount, &resp.DislikeCount)
+	if err != nil {
+		return resp, err
+	}
+
+	var userIsLike int
+	err = Database.QueryRow(
+		"SELECT is_like FROM comment_reactions WHERE comment_id = ? AND user_id = ?",
+		commentID, userID,
+	).Scan(&userIsLike)
+
+	if err == nil {
+		if userIsLike == 1 {
+			resp.UserReaction = "like"
+		} else {
+			resp.UserReaction = "dislike"
+		}
+	} else if err != sql.ErrNoRows {
+		return resp, err
+	}
+
+	return resp, nil
 }

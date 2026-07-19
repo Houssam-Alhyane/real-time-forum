@@ -7,7 +7,7 @@ import {
   renderCreatePostForm,
   submitPost,
 } from './posts.js';
-import { reactToPost } from './reactions.js';
+import { reactToPost, reactToComment } from './reactions.js';
 import { handleLogout } from './auth.js';
 import { login } from './pages/login.js';
 import { register } from './pages/register.js';
@@ -75,6 +75,12 @@ export function initAppEvents() {
         const postId = btn.dataset.postId;
         const type = btn.dataset.reactionType;
         if (postId && type) reactToPost(Number(postId), type);
+        break;
+      }
+      case 'react-comment': {
+        const commentId = btn.dataset.commentId;
+        const type = btn.dataset.reactionType;
+        if (commentId && type) reactToComment(Number(commentId), type);
         break;
       }
       case 'view-post': {

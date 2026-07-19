@@ -14,11 +14,22 @@ export function postCardHTML(p, options = {}) {
 
 // Generates the HTML string for a single comment, formatting the date chronologically
 export function commentHTML(c) {
-  const date = new Date(c.created_at);
+  const liked = c.user_reaction === 'like';
+  const disliked = c.user_reaction === 'dislike';
   return `
-    <div class="comment">
+    <div class="comment" data-comment-id="${c.id}">
       <p><strong>${escapeHTML(c.nickname)}</strong> - ${timeAgo(c.created_at)}</p>
       <p>${escapeHTML(c.content)}</p>
+      <div class="comment-reactions" data-comment-id="${c.id}">
+        <button class="react-btn-sm like-btn ${liked ? 'active' : ''}"
+                data-action="react-comment" data-comment-id="${c.id}" data-reaction-type="like">
+          👍 <span class="like-count">${c.like_count}</span>
+        </button>
+        <button class="react-btn-sm dislike-btn ${disliked ? 'active' : ''}"
+                data-action="react-comment" data-comment-id="${c.id}" data-reaction-type="dislike">
+          👎 <span class="dislike-count">${c.dislike_count}</span>
+        </button>
+      </div>
     </div>
   `;
 }

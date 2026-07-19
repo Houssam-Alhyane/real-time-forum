@@ -10,13 +10,17 @@ import (
 
 // GetCommentsAPI fetches comments with pagination for a specific post.
 func GetCommentsAPI(w http.ResponseWriter, r *http.Request) {
-	// Method Check: Restrict the request method to GET
 	if r.Method != http.MethodGet {
 		HandleError(w, http.StatusMethodNotAllowed, "Method not allowed")
 		return
 	}
 
-	// Extract Post ID: Parse the post_id from the URL query parameters
+	userID, err := GetUserIDFromSession(r)
+	if err != nil {
+		HandleError(w, http.StatusUnauthorized, "Unauthorized")
+		return
+	}
+
 	postID, err := strconv.Atoi(r.URL.Query().Get("post_id"))
 	if err != nil || postID <= 0 {
 		log.Println("Invalid post_id:", r.URL.Query().Get("post_id"))
@@ -24,30 +28,25 @@ func GetCommentsAPI(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Handle Pagination: parse limit and offset from query parameters, with defaults
 	limit, err := strconv.Atoi(r.URL.Query().Get("limit"))
 	if err != nil || limit <= 0 {
-		limit = 10 // default limit
+		limit = 10
 	}
 	if limit > 50 {
-		limit = 50 // sane upper bound
+		limit = 50
 	}
 
 	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
 	if err != nil || offset < 0 {
-		offset = 0 // default offset
+		offset = 0
 	}
 
-	// Database Query: Fetch comments from the database with nickname, content, and created_at for the specified post_id
-	comments, err := database.GetComments(postID, limit, offset)
-
-	// failed to fetch comments from the database
+	comments, err := database.GetComments(postID, userID, limit, offset)
 	if err != nil {
 		HandleError(w, http.StatusInternalServerError, "Database error")
 		return
 	}
 
-	// successful response with comments in JSON format
 	response := types.CommentsResponse{Comments: comments}
 	RespondJSON(w, http.StatusOK, response)
 }

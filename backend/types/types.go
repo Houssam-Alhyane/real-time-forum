@@ -11,9 +11,24 @@ type CommentsResponse struct {
 }
 
 type Comment struct {
-	Nickname  string `json:"nickname"`
-	Content   string `json:"content"`
-	CreatedAt string `json:"created_at"`
+	ID           int    `json:"id"`
+	Nickname     string `json:"nickname"`
+	Content      string `json:"content"`
+	CreatedAt    string `json:"created_at"`
+	LikeCount    int    `json:"like_count"`
+	DislikeCount int    `json:"dislike_count"`
+	UserReaction string `json:"user_reaction"`
+}
+
+type CommentReactRequest struct {
+	CommentID int    `json:"comment_id"`
+	Type      string `json:"type"`
+}
+
+type CommentReactResponse struct {
+	LikeCount    int    `json:"like_count"`
+	DislikeCount int    `json:"dislike_count"`
+	UserReaction string `json:"user_reaction"`
 }
 
 // MessagePayload represents the data a client sends to send a private message.
