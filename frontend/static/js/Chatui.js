@@ -12,6 +12,7 @@ import {
   handleHistoryScrollLoad,
 } from './ChatData.js';
 
+//creat side bar if not exite
 function ensureChatSidebar() {
   const sidebarCol = document.querySelector('.sidebar-col');
   if (!sidebarCol) return null;
@@ -35,6 +36,7 @@ function ensureChatSidebar() {
   return sidebar;
 }
 
+//creat chatpanel
 function ensureChatDock() {
   const container = document.querySelector('.container');
   if (!container) return null;
@@ -48,13 +50,14 @@ function ensureChatDock() {
   container.appendChild(dock);
   return dock;
 }
-
+//check if sidebar and chatpanel open
 export function injectChatLayout() {
   const sidebar = ensureChatSidebar();
   const dock = ensureChatDock();
   return Boolean(sidebar && dock);
 }
 
+//change status of the user
 export function updatePanelStatus(isOnline) {
   const statusEl = document.getElementById('chat-panel-status');
   if (!statusEl) return;
@@ -64,6 +67,7 @@ export function updatePanelStatus(isOnline) {
   statusEl.classList.toggle('st-off', !isOnline);
 }
 
+//change from object of html
 function renderMessageHTML(message) {
   const currentUserId = parseUserId(state.auth.id);
   const mine = message.sender_id === currentUserId;
@@ -87,7 +91,7 @@ function renderMessageHTML(message) {
 export function getMessagesContainer() {
   return document.getElementById('chat-messages-list');
 }
-
+//check if chat open and add message in bottom
 export function appendMessageToActiveChat(message) {
   const container = getMessagesContainer();
   if (!container || chatState.activeUserId === null) return;
@@ -104,6 +108,7 @@ export function appendMessageToActiveChat(message) {
   container.scrollTop = container.scrollHeight;
 }
 
+//upload history message and add to top
 export function prependMessageToActiveChat(message) {
   const container = getMessagesContainer();
   if (!container || chatState.activeUserId === null) return;
@@ -121,6 +126,7 @@ export function prependMessageToActiveChat(message) {
   container.scrollTop = container.scrollHeight - previousScrollHeight;
 }
 
+//check notification message
 export function updateConversationAfterMessage(message) {
   const currentUserId = parseUserId(state.auth.id);
   if (!currentUserId) return;
@@ -146,6 +152,7 @@ export function updateConversationAfterMessage(message) {
   renderChatUsers();
 }
 
+//creat chat panel inside ensureUser container
 function renderPanelShell(user) {
   const dock = document.getElementById('chat-panel-dock');
   const container = document.querySelector('.container');
@@ -192,6 +199,7 @@ function renderPanelShell(user) {
   dock.classList.add('open');
 }
 
+//add users in sidebar
 export function renderChatUsers(users) {
   if (!injectChatLayout()) return;
 
@@ -261,6 +269,7 @@ export function renderChatUsers(users) {
     .join('');
 }
 
+//open chat and remove notifatcion 
 export function openChatPanel(userId) {
   if (!injectChatLayout()) return;
 
@@ -281,7 +290,7 @@ export function openChatPanel(userId) {
   renderPanelShell(user);
   requestHistory(parsedUserId, 0);
 }
-
+//remove chat panel
 export function closeChatPanel() {
   const dock = document.getElementById('chat-panel-dock');
   const container = document.querySelector('.container');

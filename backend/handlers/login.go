@@ -29,7 +29,10 @@ func Login(w http.ResponseWriter, r *http.Request) {
 			HandleError(w, http.StatusBadRequest, "Email/username and password are required")
 			return
 		}
-
+if len(identifier)<2||len(identifier)>50||len(password)<6||len(password)>21{
+			HandleError(w, http.StatusBadRequest, "invalid data form")
+			return
+}
 		var userID int
 		var hashedPassword string
 		err := database.Database.QueryRow(

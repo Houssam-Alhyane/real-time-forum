@@ -17,7 +17,7 @@ export function renderLogin() {
     <div class="auth-shell">
       <h2>Login</h2>
       <input id="login-id" maxlength="50"  minlength="2"   placeholder="Email or Nickname">
-      <input id="login-pass" type="password" placeholder="Password">
+      <input id="login-pass" type="password"  maxlength="21"  minlength="6"  placeholder="Password">
       <button type="button" data-action="login">Login</button>
     </div>`;
 }
