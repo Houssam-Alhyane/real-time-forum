@@ -2,6 +2,7 @@ package middlewares
 
 import (
 	"net/http"
+	"time"
 	"zone/backend/database"
 	"zone/backend/handlers"
 )
@@ -12,6 +13,14 @@ func Auth(next http.HandlerFunc) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		userID, err := handlers.GetUserIDFromSession(r)
 		if err != nil {
+			http.SetCookie(w, &http.Cookie{
+				Name:     "session_token",
+				Value:    "",
+				Path:     "/",
+				Expires:  time.Unix(0, 0),
+				HttpOnly: true,
+				SameSite: http.SameSiteLaxMode,
+			})
 			handlers.HandleError(w, http.StatusUnauthorized, "Unauthorized")
 			return
 		}
