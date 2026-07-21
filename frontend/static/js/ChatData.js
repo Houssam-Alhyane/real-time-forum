@@ -153,14 +153,20 @@ export function getSortedUsers() {
   return [...chatState.usersById.values()]
     .filter((user) => user.id !== currentUserId)
     .sort((a, b) => {
+      // Only consider lastMessageTime valid if there's actual message content
+      const aHasMsg = Boolean(a.lastMessage);
+      const bHasMsg = Boolean(b.lastMessage);
       const aStamp = parseMessageDate(a.lastMessageTime);
       const bStamp = parseMessageDate(b.lastMessageTime);
-      const aHasStamp = aStamp > 0;
-      const bHasStamp = bStamp > 0;
 
-      if (aHasStamp && bHasStamp) return bStamp - aStamp;
-      if (aHasStamp !== bHasStamp) return bHasStamp - aHasStamp;
+      // Both have messages → sort by most recent first
+      if (aHasMsg && bHasMsg && aStamp > 0 && bStamp > 0) {
+        return bStamp - aStamp;
+      }
+      // One has messages, one doesn't → messages first
+      if (aHasMsg !== bHasMsg) return Number(bHasMsg) - Number(aHasMsg);
 
+      // Neither has messages (or can't compare timestamps) → alphabetical A–Z
       return a.nickname.localeCompare(b.nickname, undefined, {
         sensitivity: 'base',
       });
