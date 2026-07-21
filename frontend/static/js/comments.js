@@ -1,4 +1,5 @@
 import { navigateTo } from './routeer.js';
+import { renderError } from './pages/error.js';
 import { displayMessage } from './toast.js';
 import { postCardHTML, commentHTML, loadMoreCommentsBtnHTML } from './utils.js';
 
@@ -25,6 +26,10 @@ export async function fetchPostAndComments(postId) {
     ]);
 
     if (!postResponse.ok || !commentsResponse.ok) {
+      if (postResponse.status === 404) {
+        renderError(404);
+        return;
+      }
       throw new Error('Failed to fetch post or comments');
     }
 
