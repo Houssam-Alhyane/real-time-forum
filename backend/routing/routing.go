@@ -7,6 +7,8 @@ import (
 	middlewares "zone/backend/middleware"
 )
 
+
+
 func RegisterRout() {
 	limiter := middlewares.NewRateLimiter(60, time.Second*3) // 60 requests per 3 seconds
 
@@ -19,8 +21,13 @@ func RegisterRout() {
 			w.Write([]byte(`{"error":"endpoint not found"}`))
 			return
 		}
+
+		status := http.StatusOK
+		if !handlers.IsValidSPARoute(r.URL.Path) {
+			status = http.StatusNotFound
+		}
 		// Everything else → SPA (index.html handles routing + error display)
-		http.ServeFile(w, r, "./frontend/index.html")
+		handlers.ServeSPAIndex(w, status)
 	})
 	// Static files
 	http.HandleFunc("/static/", handlers.HandleStatic)
