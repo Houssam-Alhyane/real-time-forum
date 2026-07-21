@@ -4,7 +4,6 @@ import {
   chatState,
   parseUserId,
   formatRelativeStamp,
-  getOrCreateRenderedMessageSet,
   upsertUser,
   ensureUser,
   getSortedUsers,
@@ -97,9 +96,8 @@ export function appendMessageToActiveChat(message) {
   if (!container || chatState.activeUserId === null) return;
 
   const messageID = Number(message.id);
-  const renderedSet = getOrCreateRenderedMessageSet(chatState.activeUserId);
-  if (Number.isFinite(messageID) && renderedSet.has(messageID)) return;
-  if (Number.isFinite(messageID)) renderedSet.add(messageID);
+  if (Number.isFinite(messageID) && chatState.renderedMessageIds.has(messageID)) return;
+  if (Number.isFinite(messageID)) chatState.renderedMessageIds.add(messageID);
 
   const noHistory = container.querySelector('.chat-no-history');
   if (noHistory) noHistory.remove();
@@ -114,9 +112,8 @@ export function prependMessageToActiveChat(message) {
   if (!container || chatState.activeUserId === null) return;
 
   const messageID = Number(message.id);
-  const renderedSet = getOrCreateRenderedMessageSet(chatState.activeUserId);
-  if (Number.isFinite(messageID) && renderedSet.has(messageID)) return;
-  if (Number.isFinite(messageID)) renderedSet.add(messageID);
+  if (Number.isFinite(messageID) && chatState.renderedMessageIds.has(messageID)) return;
+  if (Number.isFinite(messageID)) chatState.renderedMessageIds.add(messageID);
 
   const previousScrollHeight = container.scrollHeight;
   const noHistory = container.querySelector('.chat-no-history');
@@ -282,10 +279,10 @@ export function openChatPanel(userId) {
   chatState.activeUserId = parsedUserId;
   renderChatUsers();
 
-  chatState.historyOffsetByPartner.set(parsedUserId, 0);
-  chatState.hasMoreHistoryByPartner.set(parsedUserId, true);
-  chatState.historyLoadingByPartner.set(parsedUserId, false);
-  chatState.renderedMessageIdsByPartner.set(parsedUserId, new Set());
+  chatState.historyOffset = 0;
+  chatState.hasMoreHistory = true;
+  chatState.historyLoading = false;
+  chatState.renderedMessageIds = new Set();
 
   renderPanelShell(user);
   requestHistory(parsedUserId, 0);

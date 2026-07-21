@@ -15,10 +15,13 @@ export const chatState = {
   socket: null,
   usersById: new Map(),
   activeUserId: null,
-  historyOffsetByPartner: new Map(),
-  hasMoreHistoryByPartner: new Map(),
-  historyLoadingByPartner: new Map(),
-  renderedMessageIdsByPartner: new Map(),
+  // These four only ever describe the single, currently-open chat panel —
+  // they're reset whenever a chat is opened, so they don't carry state
+  // across close/reopen.
+  historyOffset: 0,
+  hasMoreHistory: true,
+  historyLoading: false,
+  renderedMessageIds: new Set(),
   pendingHistoryRequest: null,
   lastScrollLoadAt: 0,
   throttleTimeoutId: null,
@@ -63,13 +66,6 @@ export function normalizeUser(input = {}) {
   };
 }
 
-export function getOrCreateRenderedMessageSet(partnerId) {
-  if (!chatState.renderedMessageIdsByPartner.has(partnerId)) {
-    chatState.renderedMessageIdsByPartner.set(partnerId, new Set());
-  }
-  return chatState.renderedMessageIdsByPartner.get(partnerId);
-}
-
 export function handleHistoryScrollLoad(e) {
   const currentPartnerId = chatState.activeUserId;
   if (!currentPartnerId) return;
@@ -101,12 +97,9 @@ export function handleHistoryScrollLoad(e) {
 
   chatState.lastScrollLoadAt = now;
 
-  const hasMore = chatState.hasMoreHistoryByPartner.get(currentPartnerId);
-  const loading = chatState.historyLoadingByPartner.get(currentPartnerId);
-  if (!hasMore || loading) return;
+  if (!chatState.hasMoreHistory || chatState.historyLoading) return;
 
-  const offset = chatState.historyOffsetByPartner.get(currentPartnerId) || 0;
-  requestHistory(currentPartnerId, offset);
+  requestHistory(currentPartnerId, chatState.historyOffset);
 }
 
 export function upsertUser(rawUser = {}) {
@@ -187,7 +180,7 @@ export function requestHistory(partnerId, offset) {
     return;
   }
 
-  chatState.historyLoadingByPartner.set(partnerId, true);
+  chatState.historyLoading = true;
   chatState.pendingHistoryRequest = { partnerId, offset };
 
   chatState.socket.send(
@@ -268,10 +261,10 @@ export function disconnectChatSocket() {
 
   chatState.usersById.clear();
   chatState.activeUserId = null;
-  chatState.historyOffsetByPartner.clear();
-  chatState.hasMoreHistoryByPartner.clear();
-  chatState.historyLoadingByPartner.clear();
-  chatState.renderedMessageIdsByPartner.clear();
+  chatState.historyOffset = 0;
+  chatState.hasMoreHistory = true;
+  chatState.historyLoading = false;
+  chatState.renderedMessageIds.clear();
   chatState.pendingHistoryRequest = null;
   chatState.lastScrollLoadAt = 0;
 }
@@ -324,11 +317,11 @@ export function handleSocketChatEvent(payload) {
 
     const { partnerId, offset } = request;
     chatState.pendingHistoryRequest = null;
-    chatState.historyLoadingByPartner.set(partnerId, false);
+    chatState.historyLoading = false;
 
     const messages = Array.isArray(payload.messages) ? payload.messages : [];
-    chatState.hasMoreHistoryByPartner.set(partnerId, Boolean(payload.has_more));
-    chatState.historyOffsetByPartner.set(partnerId, offset + messages.length);
+    chatState.hasMoreHistory = Boolean(payload.has_more);
+    chatState.historyOffset = offset + messages.length;
 
     if (chatState.activeUserId !== partnerId) return;
 
