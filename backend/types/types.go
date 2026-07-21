@@ -56,12 +56,19 @@ type Message struct {
 	SenderNickname string `json:"sender_nickname"`
 }
 
-type UserStatus struct {
-	UserID   int    `json:"user_id"`
-	Nickname string `json:"nickname"`
-	LastSeen string `json:"last_seen"`
-}
+// In backend/types/types.go, update UserStatus to include the two new
+// nullable fields returned by GetUsersByLastSeen. Do not replace your whole
+// types.go — just add LastMessage / LastMessageTime to the existing struct.
 
+type UserStatus struct {
+	UserID          int
+	Nickname        string
+	LastSeen        string
+	LastMessage     string // "" if no message history with this user
+	LastMessageTime string // "" if no message history with this user
+}
+	
+// Make sure "database/sql" is imported in types.go if it isn't already.
 // WebSocketPayload.Type values used by the server:
 // - "user_online": a user came online (first tab connected)
 // - "user_offline": a user went fully offline (last tab disconnected)

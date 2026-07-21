@@ -21,12 +21,34 @@ func UpdateLastSeen(userID int) {
 	}
 }
 
-// GetUsersByLastSeen returns users sorted by recent activity.
-func GetUsersByLastSeen() ([]types.UserStatus, error) {
+
+func GetUsersByLastSeen(currentUserID int) ([]types.UserStatus, error) {
 	rows, err := Database.Query(
-		`SELECT id, nickname, last_seen
-		FROM users
-		ORDER BY last_seen DESC, nickname ASC`,
+		`SELECT
+			u.id,
+			u.nickname,
+			u.last_seen,
+			COALESCE((
+				SELECT m.content FROM messages m
+				WHERE (m.sender_id = ? AND m.receiver_id = u.id)
+				   OR (m.sender_id = u.id AND m.receiver_id = ?)
+				ORDER BY m.created_at DESC
+				LIMIT 1
+			), '') AS last_message,
+			COALESCE((
+				SELECT m.created_at FROM messages m
+				WHERE (m.sender_id = ? AND m.receiver_id = u.id)
+				   OR (m.sender_id = u.id AND m.receiver_id = ?)
+				ORDER BY m.created_at DESC
+				LIMIT 1
+			), '') AS last_message_time
+		FROM users u
+		WHERE u.id != ?
+		ORDER BY
+			CASE WHEN last_message_time = '' THEN 1 ELSE 0 END,
+			last_message_time DESC,
+			u.nickname ASC`,
+		currentUserID, currentUserID, currentUserID, currentUserID, currentUserID,
 	)
 	if err != nil {
 		return nil, err
@@ -36,7 +58,13 @@ func GetUsersByLastSeen() ([]types.UserStatus, error) {
 	var users []types.UserStatus
 	for rows.Next() {
 		var user types.UserStatus
-		if err := rows.Scan(&user.UserID, &user.Nickname, &user.LastSeen); err != nil {
+		if err := rows.Scan(
+			&user.UserID,
+			&user.Nickname,
+			&user.LastSeen,
+			&user.LastMessage,
+			&user.LastMessageTime,
+		); err != nil {
 			return nil, err
 		}
 		users = append(users, user)
