@@ -21,6 +21,7 @@ import {
   sendActiveChatMessage,
   handleSocketChatEvent,
   handleSocketStatusEvent,
+  handleTypingSocketEvent,
 } from './ChatData.js';
 
 export function initAppEvents() {
@@ -113,6 +114,10 @@ export function initAppEvents() {
       default:
         break;
     }
+  });
+
+  document.addEventListener('chat:socket-typing', (event) => {
+    handleTypingSocketEvent(event.detail);
   });
 
   // Delegated change handler for filter checkboxes

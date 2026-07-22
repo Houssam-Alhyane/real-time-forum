@@ -132,7 +132,8 @@ func readPump(userID int, client *wsClient) {
 }
 
 // handleIncomingMessage is the WebSocket entry point for incoming message events.
-// It currently handles history requests and chat-message routing.
+// It currently handles history requests, chat-message routing, and typing
+// indicator events.
 func handleIncomingMessage(userID int, client *wsClient, payload []byte) error {
 	envelope, err := parseEnvelope(payload)
 	if err != nil {
@@ -144,6 +145,8 @@ func handleIncomingMessage(userID int, client *wsClient, payload []byte) error {
 		return handleHistoryRequest(userID, client, payload)
 	case "send_message":
 		return handleSendMessage(userID, client, payload)
+	case "typing_start", "typing_stop":
+		return handleTypingEvent(userID, client, envelope.Type, payload)
 	default:
 		return sendSocketError(client, "unknown type")
 	}

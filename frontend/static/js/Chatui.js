@@ -10,6 +10,7 @@ import {
   requestHistory,
   handleHistoryScrollLoad,
 } from './ChatData.js';
+import { attachTypingListeners, resetTypingUI } from './typing.js';
 
 //creat side bar if not exite
 function ensureChatSidebar() {
@@ -96,7 +97,8 @@ export function appendMessageToActiveChat(message) {
   if (!container || chatState.activeUserId === null) return;
 
   const messageID = Number(message.id);
-  if (Number.isFinite(messageID) && chatState.renderedMessageIds.has(messageID)) return;
+  if (Number.isFinite(messageID) && chatState.renderedMessageIds.has(messageID))
+    return;
   if (Number.isFinite(messageID)) chatState.renderedMessageIds.add(messageID);
 
   const noHistory = container.querySelector('.chat-no-history');
@@ -112,7 +114,8 @@ export function prependMessageToActiveChat(message) {
   if (!container || chatState.activeUserId === null) return;
 
   const messageID = Number(message.id);
-  if (Number.isFinite(messageID) && chatState.renderedMessageIds.has(messageID)) return;
+  if (Number.isFinite(messageID) && chatState.renderedMessageIds.has(messageID))
+    return;
   if (Number.isFinite(messageID)) chatState.renderedMessageIds.add(messageID);
 
   const previousScrollHeight = container.scrollHeight;
@@ -173,6 +176,10 @@ function renderPanelShell(user) {
       <div id="chat-messages-list" class="chat-messages">
         <div class="chat-no-history">No messages yet.</div>
       </div>
+      <div id="chat-typing-indicator" class="chat-typing-indicator">
+        <span class="chat-typing-name"></span>
+        <span class="chat-typing-dots"><span></span><span></span><span></span></span>
+      </div>
       <div class="chat-input-row">
         <input
           id="chat-input"
@@ -194,6 +201,9 @@ function renderPanelShell(user) {
 
   container.classList.add('chat-open');
   dock.classList.add('open');
+
+  // Wire up typing-in-progress detection on the newly created input.
+  attachTypingListeners();
 }
 
 //add users in sidebar
@@ -266,12 +276,15 @@ export function renderChatUsers(users) {
     .join('');
 }
 
-//open chat and remove notifatcion 
+//open chat and remove notifatcion
 export function openChatPanel(userId) {
   if (!injectChatLayout()) return;
 
   const parsedUserId = parseUserId(userId);
   if (!parsedUserId) return;
+
+  // Clear any typing state/indicator left over from a previously open chat.
+  resetTypingUI();
 
   const user = ensureUser(parsedUserId);
   user.unread = 0;
@@ -289,6 +302,10 @@ export function openChatPanel(userId) {
 }
 //remove chat panel
 export function closeChatPanel() {
+  // Stop any pending typing signal and hide the indicator before tearing
+  // down the panel.
+  resetTypingUI();
+
   const dock = document.getElementById('chat-panel-dock');
   const container = document.querySelector('.container');
 

@@ -9,7 +9,15 @@ import {
   getMessagesContainer,
 } from './Chatui.js';
 
+import { hideTypingIndicator, showTypingIndicator } from './typing.js';
+export const REMOTE_TYPING_TIMEOUT_MS = 4000;
 const HISTORY_SCROLL_THROTTLE_MS = 1000;
+
+export const typingState = {
+  lastStartSentAt: 0,
+  stopTimeoutId: null,
+  remoteTypingTimeoutId: null,
+};
 
 export const chatState = {
   socket: null,
@@ -233,6 +241,14 @@ export function initWebSocket() {
       return;
     }
 
+    // Typing-in-progress indicator events, relayed from the other user.
+    if (payload?.type === 'typing') {
+      document.dispatchEvent(
+        new CustomEvent('chat:socket-typing', { detail: payload })
+      );
+      return;
+    }
+
     document.dispatchEvent(
       new CustomEvent('chat:socket-chat', { detail: payload })
     );
@@ -380,4 +396,25 @@ export function sendActiveChatMessage() {
   );
 
   input.value = '';
+}
+
+export function handleTypingSocketEvent(payload) {
+  const senderId = parseUserId(payload?.sender_id);
+  if (!senderId) return;
+  if (chatState.activeUserId !== senderId) return;
+
+  if (typingState.remoteTypingTimeoutId) {
+    clearTimeout(typingState.remoteTypingTimeoutId);
+    typingState.remoteTypingTimeoutId = null;
+  }
+
+  if (payload.status === 'start') {
+    showTypingIndicator(payload.sender_nickname || 'Someone');
+    typingState.remoteTypingTimeoutId = setTimeout(() => {
+      hideTypingIndicator();
+      typingState.remoteTypingTimeoutId = null;
+    }, REMOTE_TYPING_TIMEOUT_MS);
+  } else {
+    hideTypingIndicator();
+  }
 }
