@@ -1620,16 +1620,21 @@ button:focus-visible,
 @media (max-width: 768px) {
   .chat-panel-dock.open {
     width: calc(100vw - 20px);
-    height: 320px;
+    height: min(460px, calc(100vh - 100px));
     right: 10px;
     left: 10px;
     bottom: 10px;
   }
 
+  /* Single-column layout on small screens regardless of chat state */
+  .container {
+    grid-template-columns: 1fr;
+  }
+
   /* Prevent chat dock from interfering with main page content, and force
      single-column layout on small screens while chat is open */
   .container.chat-open {
-    padding-bottom: 340px; /* Make space for chat dock */
+    padding-bottom: 480px; /* Make space for chat dock */
     grid-template-columns: 1fr; /* Force single column layout */
   }
 
