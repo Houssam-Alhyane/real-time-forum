@@ -10,7 +10,7 @@ import {
 } from './Chatui.js';
 
 import { hideTypingIndicator, showTypingIndicator } from './typing.js';
-export const REMOTE_TYPING_TIMEOUT_MS = 4000;
+const REMOTE_TYPING_TIMEOUT_MS = 4000;
 const HISTORY_SCROLL_THROTTLE_MS = 1000;
 
 export const typingState = {
