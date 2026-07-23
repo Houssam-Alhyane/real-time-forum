@@ -337,7 +337,14 @@ export function handleSocketChatEvent(payload) {
 
     const messages = Array.isArray(payload.messages) ? payload.messages : [];
     chatState.hasMoreHistory = Boolean(payload.has_more);
-    chatState.historyOffset = offset + messages.length;
+
+    // Use the oldest message ID as the anchor for the next pagination request.
+    // Messages arrive in created_at DESC (newest-first) order, so the last
+    // element is the oldest.  This freezes the pagination window so that new
+    // messages arriving via WebSocket don't cause duplicates or page-skips.
+    const oldestId =
+      messages.length > 0 ? messages[messages.length - 1].id : 0;
+    chatState.historyOffset = oldestId;
 
     if (chatState.activeUserId !== partnerId) return;
 

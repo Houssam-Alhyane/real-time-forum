@@ -116,16 +116,31 @@ func GetMessageByID(messageID int) (types.Message, error) {
 }
 
 // GetMessages retrieves private messages between two users with pagination.
-func GetMessages(userID1, userID2, limit, offset int) ([]types.Message, bool, error) {
-	rows, err := Database.Query(
-		`SELECT m.id, m.sender_id, m.receiver_id, m.content, m.created_at, u.nickname
+// beforeID specifies the oldest message ID already loaded; pass 0 to get the latest messages.
+func GetMessages(userID1, userID2, limit, beforeID int) ([]types.Message, bool, error) {
+	var query string
+	var args []interface{}
+
+	if beforeID <= 0 {
+		query = `SELECT m.id, m.sender_id, m.receiver_id, m.content, m.created_at, u.nickname
 		FROM messages m
 		JOIN users u ON u.id = m.sender_id
 		WHERE (m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?)
 		ORDER BY m.created_at DESC
-		LIMIT ? OFFSET ?`,
-		userID1, userID2, userID2, userID1, limit+1, offset,
-	)
+		LIMIT ?`
+		args = []interface{}{userID1, userID2, userID2, userID1, limit + 1}
+	} else {
+		query = `SELECT m.id, m.sender_id, m.receiver_id, m.content, m.created_at, u.nickname
+		FROM messages m
+		JOIN users u ON u.id = m.sender_id
+		WHERE ((m.sender_id = ? AND m.receiver_id = ?) OR (m.sender_id = ? AND m.receiver_id = ?))
+		AND m.id < ?
+		ORDER BY m.created_at DESC
+		LIMIT ?`
+		args = []interface{}{userID1, userID2, userID2, userID1, beforeID, limit + 1}
+	}
+
+	rows, err := Database.Query(query, args...)
 	if err != nil {
 		return nil, false, err
 	}
