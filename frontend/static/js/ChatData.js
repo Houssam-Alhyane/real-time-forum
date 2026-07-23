@@ -10,7 +10,7 @@ import {
 } from './Chatui.js';
 
 import { hideTypingIndicator, showTypingIndicator } from './typing.js';
-const REMOTE_TYPING_TIMEOUT_MS = 4000;
+const REMOTE_TYPING_TIMEOUT_MS = 500;
 const HISTORY_SCROLL_THROTTLE_MS = 1000;
 
 export const typingState = {
@@ -403,18 +403,13 @@ export function handleTypingSocketEvent(payload) {
   if (!senderId) return;
   if (chatState.activeUserId !== senderId) return;
 
+  showTypingIndicator(payload.sender_nickname || 'Someone');
+
   if (typingState.remoteTypingTimeoutId) {
     clearTimeout(typingState.remoteTypingTimeoutId);
-    typingState.remoteTypingTimeoutId = null;
   }
-
-  if (payload.status === 'start') {
-    showTypingIndicator(payload.sender_nickname || 'Someone');
-    typingState.remoteTypingTimeoutId = setTimeout(() => {
-      hideTypingIndicator();
-      typingState.remoteTypingTimeoutId = null;
-    }, REMOTE_TYPING_TIMEOUT_MS);
-  } else {
+  typingState.remoteTypingTimeoutId = setTimeout(() => {
     hideTypingIndicator();
-  }
+    typingState.remoteTypingTimeoutId = null;
+  }, REMOTE_TYPING_TIMEOUT_MS);
 }

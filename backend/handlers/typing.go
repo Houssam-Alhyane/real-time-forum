@@ -1,27 +1,22 @@
 package handlers
 
-
 import (
 	"encoding/json"
 	"errors"
 	"log"
 )
 
-
 type typingRequest struct {
 	Type       string `json:"type"`
 	ReceiverID int    `json:"receiver_id"`
 }
-
-
 type typingBroadcast struct {
 	Type           string `json:"type"` // always "typing"
 	SenderID       int    `json:"sender_id"`
 	SenderNickname string `json:"sender_nickname"`
-	Status         string `json:"status"` // "start" or "stop"
 }
 
-func handleTypingEvent(userID int, client *wsClient, envelopeType string, payload []byte) error {
+func handleTypingEvent(userID int, client *wsClient, payload []byte) error {
 	var req typingRequest
 	if err := json.Unmarshal(payload, &req); err != nil {
 		return sendSocketError(client, "invalid typing payload")
@@ -29,11 +24,6 @@ func handleTypingEvent(userID int, client *wsClient, envelopeType string, payloa
 
 	if err := validateTypingRequest(req); err != nil {
 		return sendSocketError(client, err.Error())
-	}
-
-	status := "start"
-	if envelopeType == "typing_stop" {
-		status = "stop"
 	}
 
 	nickname, err := getNicknameByUserID(userID)
@@ -45,14 +35,15 @@ func handleTypingEvent(userID int, client *wsClient, envelopeType string, payloa
 		Type:           "typing",
 		SenderID:       userID,
 		SenderNickname: nickname,
-		Status:         status,
 	}
 
+	// Only the receiver needs this — the sender already knows they're typing.
 	broadcastTyping(broadcast, req.ReceiverID)
 
 	return nil
 }
 
+// validateTypingRequest checks that the receiver_id field is present and sane.
 func validateTypingRequest(req typingRequest) error {
 	if req.ReceiverID <= 0 {
 		return errors.New("invalid receiver_id")
