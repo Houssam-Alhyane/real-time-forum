@@ -1470,21 +1470,19 @@ button:focus-visible,
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 0 0.9rem;
-  height: 0;
-  overflow: hidden;
+  padding: 4px 0.9rem;
+  height: 22px;          /* ‼️ Space always reserved so messages don't shift */
   font-size: 0.72rem;
   font-weight: 600;
   color: var(--text-muted);
-  opacity: 0;
+  opacity: 0;            /* Hidden by default; only opacity toggles */
   flex-shrink: 0;
-  transition: opacity 0.15s var(--ease), height 0.15s var(--ease);
+  transition: opacity 0.15s var(--ease);
+  pointer-events: none;  /* Never blocks clicks, even when fading through */
 }
 
 .chat-typing-indicator.visible {
   opacity: 1;
-  height: 22px;
-  padding: 4px 0.9rem;
 }
 
 .chat-typing-dots {
