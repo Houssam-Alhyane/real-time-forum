@@ -9,8 +9,9 @@ import {
   getSortedUsers,
   requestHistory,
   handleHistoryScrollLoad,
+  typingState,
+  emitTypingSignal,
 } from './ChatData.js';
-import { attachTypingListeners, resetTypingUI } from './typing.js';
 
 //creat side bar if not exite
 function ensureChatSidebar() {
@@ -152,6 +153,40 @@ export function updateConversationAfterMessage(message) {
   renderChatUsers();
 }
 
+// ---------- Typing signal (UI layer) ----------
+
+function getTypingElement() {
+  return document.getElementById('chat-typing-indicator');
+}
+
+export function showTypingIndicator(nickname) {
+  const el = getTypingElement();
+  if (!el) return;
+  const nameEl = el.querySelector('.chat-typing-name');
+  if (nameEl) nameEl.textContent = `${nickname} is typing`;
+  el.classList.add('visible');
+}
+
+export function hideTypingIndicator() {
+  const el = getTypingElement();
+  if (!el) return;
+  el.classList.remove('visible');
+}
+
+export function setupTypingListeners() {
+  const input = document.getElementById('chat-input');
+  if (!input) return;
+  input.addEventListener('input', emitTypingSignal);
+}
+
+export function clearTypingState() {
+  hideTypingIndicator();
+  if (typingState.bannerTimeoutId) {
+    clearTimeout(typingState.bannerTimeoutId);
+    typingState.bannerTimeoutId = null;
+  }
+}
+
 //creat chat panel inside ensureUser container
 function renderPanelShell(user) {
   const dock = document.getElementById('chat-panel-dock');
@@ -203,7 +238,7 @@ function renderPanelShell(user) {
   dock.classList.add('open');
 
   // Wire up typing-in-progress detection on the newly created input.
-  attachTypingListeners();
+  setupTypingListeners();
 }
 
 //add users in sidebar
@@ -284,7 +319,7 @@ export function openChatPanel(userId) {
   if (!parsedUserId) return;
 
   // Clear any typing state/indicator left over from a previously open chat.
-  resetTypingUI();
+  clearTypingState();
 
   const user = ensureUser(parsedUserId);
   user.unread = 0;
@@ -304,7 +339,7 @@ export function openChatPanel(userId) {
 export function closeChatPanel() {
   // Stop any pending typing signal and hide the indicator before tearing
   // down the panel.
-  resetTypingUI();
+  clearTypingState();
 
   const dock = document.getElementById('chat-panel-dock');
   const container = document.querySelector('.container');

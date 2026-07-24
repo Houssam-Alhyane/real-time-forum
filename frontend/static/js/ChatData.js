@@ -7,16 +7,17 @@ import {
   prependMessageToActiveChat,
   updateConversationAfterMessage,
   getMessagesContainer,
+  hideTypingIndicator,
+  showTypingIndicator,
 } from './Chatui.js';
 
-import { hideTypingIndicator, showTypingIndicator } from './typing.js';
-const REMOTE_TYPING_TIMEOUT_MS = 500;
+const TYPING_BANNER_TIMEOUT_MS = 500;
 const HISTORY_SCROLL_THROTTLE_MS = 1000;
 
 export const typingState = {
-  lastStartSentAt: 0,
+  lastSignalSentAt: 0,
   stopTimeoutId: null,
-  remoteTypingTimeoutId: null,
+  bannerTimeoutId: null,
 };
 
 export const chatState = {
@@ -377,6 +378,22 @@ export function handleSocketChatEvent(payload) {
   }
 }
 
+// ---------- Typing signal (data layer) ----------
+
+function sendTypingSignal(receiverId) {
+  if (!chatState.socket || chatState.socket.readyState !== WebSocket.OPEN)
+    return;
+  chatState.socket.send(
+    JSON.stringify({ type: 'typing', receiver_id: receiverId })
+  );
+}
+
+export function emitTypingSignal() {
+  const partnerId = chatState.activeUserId;
+  if (!partnerId) return;
+  sendTypingSignal(partnerId);
+}
+
 export function sendActiveChatMessage() {
   const currentUserId = parseUserId(state.auth.id);
   const partnerId = chatState.activeUserId;
@@ -406,17 +423,17 @@ export function sendActiveChatMessage() {
 }
 
 export function handleTypingSocketEvent(payload) {
-  const senderId = parseUserId(payload?.sender_id);
+  const senderId = parseUserId(payload?.user_id);
   if (!senderId) return;
   if (chatState.activeUserId !== senderId) return;
 
-  showTypingIndicator(payload.sender_nickname || 'Someone');
+  showTypingIndicator(payload.nickname || 'Someone');
 
-  if (typingState.remoteTypingTimeoutId) {
-    clearTimeout(typingState.remoteTypingTimeoutId);
+  if (typingState.bannerTimeoutId) {
+    clearTimeout(typingState.bannerTimeoutId);
   }
-  typingState.remoteTypingTimeoutId = setTimeout(() => {
+  typingState.bannerTimeoutId = setTimeout(() => {
     hideTypingIndicator();
-    typingState.remoteTypingTimeoutId = null;
-  }, REMOTE_TYPING_TIMEOUT_MS);
+    typingState.bannerTimeoutId = null;
+  }, TYPING_BANNER_TIMEOUT_MS);
 }

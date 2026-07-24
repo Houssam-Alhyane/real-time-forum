@@ -133,7 +133,7 @@ func readPump(userID int, client *wsClient) {
 
 // handleIncomingMessage is the WebSocket entry point for incoming message events.
 // It currently handles history requests, chat-message routing, and typing
-// indicator events.
+// signal events.
 func handleIncomingMessage(userID int, client *wsClient, payload []byte) error {
 	envelope, err := parseEnvelope(payload)
 	if err != nil {
@@ -150,6 +150,48 @@ func handleIncomingMessage(userID int, client *wsClient, payload []byte) error {
 	default:
 		return sendSocketError(client, "unknown type")
 	}
+}
+
+// ---------- Typing indicator ----------
+
+type typingRequest struct {
+	Type       string `json:"type"`
+	ReceiverID int    `json:"receiver_id"`
+}
+
+func handleTypingEvent(userID int, client *wsClient, payload []byte) error {
+	var req typingRequest
+	if err := json.Unmarshal(payload, &req); err != nil {
+		return sendSocketError(client, "invalid typing payload")
+	}
+
+	if err := validateTypingRequest(req); err != nil {
+		return sendSocketError(client, err.Error())
+	}
+
+	nickname, err := getNicknameByUserID(userID)
+	if err != nil {
+		log.Println("getNicknameByUserID (typing):", err)
+	}
+
+	payloadToSend := types.WebSocketPayload{
+		Type:     "typing",
+		UserID:   userID,
+		Nickname: nickname,
+	}
+
+	// Only the receiver needs this — the sender already knows they're typing.
+	broadcastToUsers(payloadToSend, req.ReceiverID)
+
+	return nil
+}
+
+// validateTypingRequest checks that the receiver_id field is present and sane.
+func validateTypingRequest(req typingRequest) error {
+	if req.ReceiverID <= 0 {
+		return errors.New("invalid receiver_id")
+	}
+	return nil
 }
 
 // parseEnvelope extracts only the message type from a raw WebSocket payload.
