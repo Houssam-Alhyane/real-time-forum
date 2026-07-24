@@ -192,9 +192,13 @@ func CreateComment(postID, userID int, content string) error {
 }
 
 // GetComments retrieves comments for a specific post with pagination along with the commenter's nickname and the creation timestamp.
-func GetComments(postID, userID, limit, offset int) ([]types.Comment, error) {
-	rows, err := Database.Query(
-		`SELECT c.id, u.nickname, c.content, c.created_at,
+// beforeID specifies the oldest comment ID already loaded; pass 0 to get the latest comments.
+func GetComments(postID, userID, limit, beforeID int) ([]types.Comment, error) {
+	var query string
+	var args []interface{}
+
+	if beforeID <= 0 {
+		query = `SELECT c.id, u.nickname, c.content, c.created_at,
 			COALESCE(cr_counts.like_count, 0),
 			COALESCE(cr_counts.dislike_count, 0),
 			COALESCE(cr_user.is_like, -1)
@@ -210,8 +214,31 @@ func GetComments(postID, userID, limit, offset int) ([]types.Comment, error) {
 		LEFT JOIN comment_reactions cr_user ON cr_user.comment_id = c.id AND cr_user.user_id = ?
 		WHERE c.post_id = ?
 		ORDER BY c.created_at DESC
-		LIMIT ? OFFSET ?`, userID, postID, limit, offset,
-	)
+		LIMIT ?`
+		args = []interface{}{userID, postID, limit}
+	} else {
+		query = `SELECT c.id, u.nickname, c.content, c.created_at,
+			COALESCE(cr_counts.like_count, 0),
+			COALESCE(cr_counts.dislike_count, 0),
+			COALESCE(cr_user.is_like, -1)
+		FROM comments c
+		JOIN users u ON c.user_id = u.id
+		LEFT JOIN (
+			SELECT comment_id,
+				SUM(CASE WHEN is_like = 1 THEN 1 ELSE 0 END) AS like_count,
+				SUM(CASE WHEN is_like = 0 THEN 1 ELSE 0 END) AS dislike_count
+			FROM comment_reactions
+			GROUP BY comment_id
+		) cr_counts ON cr_counts.comment_id = c.id
+		LEFT JOIN comment_reactions cr_user ON cr_user.comment_id = c.id AND cr_user.user_id = ?
+		WHERE c.post_id = ?
+		AND c.id < ?
+		ORDER BY c.created_at DESC
+		LIMIT ?`
+		args = []interface{}{userID, postID, beforeID, limit}
+	}
+
+	rows, err := Database.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}

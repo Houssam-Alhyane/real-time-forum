@@ -3,7 +3,7 @@ import { renderError } from './pages/error.js';
 import { displayMessage } from './toast.js';
 import { postCardHTML, commentHTML, loadMoreCommentsBtnHTML } from './utils.js';
 
-let offset = 0;
+let oldestCommentId = 0;
 let hasMore = true;
 const pageSize = 10;
 
@@ -14,14 +14,14 @@ function updateLoadMoreButton(postId) {
 }
 
 export async function fetchPostAndComments(postId) {
-  offset = 0;
+  oldestCommentId = 0;
   hasMore = true;
 
   try {
     const [postResponse, commentsResponse] = await Promise.all([
       fetch(`/api/posts/${postId}`),
       fetch(
-        `/api/posts/comments?post_id=${postId}&offset=${offset}&limit=${pageSize + 1}`,
+        `/api/posts/comments?post_id=${postId}&before_id=${oldestCommentId}&limit=${pageSize + 1}`,
       ),
     ]);
 
@@ -41,7 +41,12 @@ export async function fetchPostAndComments(postId) {
 
     hasMore = allComments.length > pageSize;
     const comments = allComments.slice(0, pageSize);
-    offset += comments.length;
+    // Track the oldest comment ID as the anchor for next pagination.
+    // Comments arrive in created_at DESC (newest-first) order, so the last
+    // element is the oldest.  This freezes the pagination window so new
+    // comments don't cause duplicates or page-skips.
+    oldestCommentId =
+      comments.length > 0 ? comments[comments.length - 1].id : 0;
 
     const postContainer = document.getElementById('post-container');
     if (postContainer) {
@@ -62,7 +67,7 @@ async function fetchComments(postId) {
   if (!hasMore) return [];
 
   const response = await fetch(
-    `/api/posts/comments?post_id=${postId}&offset=${offset}&limit=${pageSize + 1}`,
+    `/api/posts/comments?post_id=${postId}&before_id=${oldestCommentId}&limit=${pageSize + 1}`,
   );
 
   if (!response.ok) {
@@ -74,7 +79,9 @@ async function fetchComments(postId) {
 
   hasMore = allComments.length > pageSize;
   const comments = allComments.slice(0, pageSize);
-  offset += comments.length;
+  // Track the oldest comment ID for the next pagination request.
+  oldestCommentId =
+    comments.length > 0 ? comments[comments.length - 1].id : 0;
 
   return comments;
 }

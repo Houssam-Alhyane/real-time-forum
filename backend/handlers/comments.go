@@ -37,12 +37,12 @@ func GetCommentsAPI(w http.ResponseWriter, r *http.Request) {
 		limit = 50
 	}
 
-	offset, err := strconv.Atoi(r.URL.Query().Get("offset"))
-	if err != nil || offset < 0 {
-		offset = 0
+	beforeID, err := strconv.Atoi(r.URL.Query().Get("before_id"))
+	if err != nil || beforeID < 0 {
+		beforeID = 0
 	}
 
-	comments, err := database.GetComments(postID, userID, limit, offset)
+	comments, err := database.GetComments(postID, userID, limit, beforeID)
 	if err != nil {
 		HandleError(w, http.StatusInternalServerError, "Database error")
 		return
