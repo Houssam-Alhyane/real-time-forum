@@ -38,7 +38,7 @@ plain JavaScript.
 - Passwords are hashed with `bcrypt` before being stored.
 
 ### Posts & Comments
-
+ 
 - Authenticated users can create posts, each assigned to one or more
   categories.
 - Posts are displayed in a feed.
