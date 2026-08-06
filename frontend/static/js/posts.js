@@ -1,5 +1,5 @@
 import { state } from './state.js';
-import { navigateTo } from './routeer.js';
+import { navigateTo } from './router.js';
 import { displayMessage } from './toast.js';
 import { escapeHTML, postCardHTML } from './utils.js';
 

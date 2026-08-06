@@ -1,6 +1,6 @@
 // reactions.js
 import { state } from './state.js';
-import { navigateTo } from './routeer.js';
+import { navigateTo } from './router.js';
 import { displayMessage } from './toast.js';
 
 export async function reactToPost(postId, type) {

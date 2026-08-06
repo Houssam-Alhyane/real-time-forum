@@ -1,4 +1,4 @@
-import { router, navigateTo } from './routeer.js';
+import { router, navigateTo } from './router.js';
 import {
   loadPosts,
   loadMorePosts,

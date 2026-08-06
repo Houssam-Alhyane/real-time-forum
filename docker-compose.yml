@@ -1,0 +1,17 @@
+services:
+  forum:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: real-time-forum
+    ports:
+      - "8082:8082"
+    volumes:
+      # Persist the SQLite database across container restarts.
+      # The volume is mounted over backend/database, so schema.sql from the
+      # image is copied into it on first run. Reset with: docker compose down -v
+      - forum-data:/app/backend/database
+    restart: always
+
+volumes:
+  forum-data:

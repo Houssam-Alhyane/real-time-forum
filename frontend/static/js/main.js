@@ -1,5 +1,5 @@
 import { initAuth, state } from './state.js';
-import { router } from './routeer.js';
+import { router } from './router.js';
 import { initAuthSync } from './auth.js';
 import { initAppEvents } from './app-events.js';
 import { initWebSocket } from './ChatData.js';

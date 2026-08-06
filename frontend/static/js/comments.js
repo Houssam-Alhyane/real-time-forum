@@ -1,4 +1,4 @@
-import { navigateTo } from './routeer.js';
+import { navigateTo } from './router.js';
 import { renderError } from './pages/error.js';
 import { displayMessage } from './toast.js';
 import { postCardHTML, commentHTML, loadMoreCommentsBtnHTML } from './utils.js';

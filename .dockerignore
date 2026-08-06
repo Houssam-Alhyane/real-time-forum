@@ -1,0 +1,7 @@
+.git
+.gitignore
+*.md
+backend/database/forum.db
+Dockerfile
+docker-compose.yml
+.dockerignore

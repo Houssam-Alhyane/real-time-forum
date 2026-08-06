@@ -1,5 +1,5 @@
 import { state, initAuth } from '../state.js';
-import { navigateTo } from '../routeer.js';
+import { navigateTo } from '../router.js';
 import { renderNavbar } from '../navbar.js';
 import { displayMessage } from '../toast.js';
 
