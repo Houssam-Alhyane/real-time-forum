@@ -10,6 +10,7 @@ This project builds on a previous forum implementation, rewritten as a
 transition (login, register, feed, post view) is handled entirely in
 JavaScript on the client, talking to a Go backend over HTTP and WebSockets.
 
+
 ## Tech Stack
 
 | Layer    | Technology                                     |
