@@ -142,7 +142,7 @@ Then open [http://localhost:8082](http://localhost:8082) in your browser.
 Requires [Docker](https://www.docker.com/) with Compose.
 
 ```bash
-docker compose up --build
+docker compose up -d
 ```
 
 Then open [http://localhost:9070](http://localhost:9070) in your browser (mapped from the container's port `8082`). No local Go toolchain or C compiler is needed — the app builds inside the container.
