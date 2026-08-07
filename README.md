@@ -4,10 +4,10 @@
 
 **A single-page forum application with registration, posts, comments, reactions, and real-time private messaging over WebSockets.**
 
-![Go](https://img.shields.io/badge/Go-1.25-00ADD8?style=flat-square&logo=go&logoColor=white)
-![SQLite](https://img.shields.io/badge/SQLite-003B57?style=flat-square&logo=sqlite&logoColor=white)
-![WebSockets](https://img.shields.io/badge/WebSockets-realtime-010101?style=flat-square)
-![Vanilla JS](https://img.shields.io/badge/Vanilla%20JS-no%20frameworks-F7DF1E?style=flat-square&logo=javascript&logoColor=black)
+![Go](https://img.shields.io/badge/Go-1.25-30363D?style=flat-square&labelColor=00ADD8&logo=go&logoColor=white)
+![SQLite](https://img.shields.io/badge/SQLite-embedded-30363D?style=flat-square&labelColor=003B57&logo=sqlite&logoColor=white)
+![WebSockets](https://img.shields.io/badge/WebSockets-realtime-30363D?style=flat-square&labelColor=010101)
+![Vanilla JS](https://img.shields.io/badge/Vanilla%20JS-no%20frameworks-30363D?style=flat-square&labelColor=F7DF1E&logo=javascript&logoColor=black)
 
 </div>
 

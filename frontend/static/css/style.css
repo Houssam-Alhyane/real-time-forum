@@ -179,6 +179,11 @@ button:focus-visible,
   font-weight: 600;
   color: var(--text-secondary);
   padding-right: 4px;
+  min-width: 0;
+  max-width: 40vw;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* ============================================================
@@ -1755,9 +1760,6 @@ button:focus-visible,
   }
   .auth-buttons {
     gap: 6px;
-  }
-  .nav-username {
-    display: none;
   }
   .demo-users {
     grid-template-columns: minmax(0, 1fr);
