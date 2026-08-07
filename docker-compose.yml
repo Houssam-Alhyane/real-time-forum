@@ -1,15 +1,14 @@
 services:
   forum:
+    image: elmehdirezoug/real-time-forum:latest
+    # Delete this build block to use the image from the registry instead.
     build:
       context: .
       dockerfile: Dockerfile
     container_name: real-time-forum
     ports:
-      - "9070:8082"   # host:container — container port is unchanged
+      - "9070:8082"   # host:container
     volumes:
-      # Persist the SQLite database across container restarts.
-      # The volume is mounted over backend/database, so schema.sql from the
-      # image is copied into it on first run. Reset with: docker compose down -v
       - forum-data:/app/backend/database
     restart: always
 
