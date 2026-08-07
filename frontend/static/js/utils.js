@@ -4,11 +4,15 @@ export function postCardHTML(p, options = {}) {
     .map((c) => `<span class="category-tag">${escapeHTML(c)}</span>`)
     .join(' ');
   return `
-  <h3>author: ${escapeHTML(p.nickname)}</h3>
-    <h3>${escapeHTML(p.title)}</h3>
+  <div class="post-header">
+    <span class="post-author">@${escapeHTML(p.nickname)}</span>
+    <h3 class="post-title">${escapeHTML(p.title)}</h3>
+  </div>
+  <div class="post-body">
     <p>${escapeHTML(p.content)}</p>
-    <div class="post-categories">${categoriesHtml}</div>
-    ${renderReactionBar(p, options)}
+  </div>
+  <div class="post-categories">${categoriesHtml}</div>
+  ${renderReactionBar(p, options)}
   `;
 }
 

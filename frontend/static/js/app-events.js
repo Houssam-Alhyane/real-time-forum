@@ -9,7 +9,7 @@ import {
 } from './posts.js';
 import { reactToPost, reactToComment } from './reactions.js';
 import { handleLogout } from './auth.js';
-import { login } from './pages/login.js';
+import { login, demoLogin } from './pages/login.js';
 import { register } from './pages/register.js';
 import {
   fetchPostAndComments,
@@ -57,6 +57,11 @@ export function initAppEvents() {
       }
       case 'login': {
         login();
+        break;
+      }
+      case 'demo-login': {
+        const nickname = btn.dataset.nickname;
+        if (nickname) demoLogin(nickname);
         break;
       }
       case 'register': {

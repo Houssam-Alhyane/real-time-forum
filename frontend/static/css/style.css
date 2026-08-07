@@ -38,6 +38,7 @@
   --text-primary: #f4f4f6;
   --text-secondary: #a3a3ad;
   --text-muted: #6b6b75;
+  --text-body: #d6d6df; /* post content — brighter than secondary for readability */
 
   /* status */
   --success: #3ecf8e;
@@ -427,58 +428,58 @@ button:focus-visible,
   }
 }
 
-/* Author byline — first bare <h3> emitted by postCardHTML() */
-.post h3:first-of-type {
-  font-size: 0.72rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--text-muted);
-  margin-bottom: 0.5rem;
+/* Post header — author byline + title (postCardHTML) */
+.post-header {
+  margin-bottom: 0.95rem;
 }
 
-/* Post title — second bare <h3> emitted by postCardHTML() */
-.post h3:nth-of-type(2) {
-  font-size: 1.15rem;
+/* Author byline */
+.post-author {
+  display: block;
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  color: var(--accent);
+  margin-bottom: 0.4rem;
+}
+
+/* Post title */
+.post-title {
+  font-size: 1.18rem;
   font-weight: 700;
   letter-spacing: -0.01em;
   color: var(--text-primary);
   line-height: 1.35;
-  margin-bottom: 0.55rem;
 }
 
-/* Post body text */
-.post p {
-  font-size: 0.92rem;
+/* Post body — inset panel that clearly separates content from the title */
+.post-body {
+  margin-top: 0.9rem;
+  padding: 0.95rem 1.05rem;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  transition: border-color 0.18s var(--ease);
+}
+.post:hover .post-body {
+  border-color: var(--border-hover);
+}
+.post-body p {
+  font-size: 0.95rem;
   font-weight: 400;
-  color: var(--text-secondary);
+  color: var(--text-body);
   line-height: 1.7;
-  margin-bottom: 0.9rem;
   white-space: pre-wrap;
   word-break: break-word;
 }
 
-/* Legacy wrapper support (kept for forward-compatibility, unused by current JS) */
-.post-header {
-  margin-bottom: 0.75rem;
-}
-.post-header h3 {
-  font-size: 1.15rem;
-  font-weight: 700;
-  color: var(--text-primary);
-  margin-bottom: 0.4rem;
-  line-height: 1.35;
-}
 .post-categories {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  margin-top: 0.75rem;
   margin-bottom: 0.4rem;
-}
-.post-body p {
-  font-size: 0.92rem;
-  color: var(--text-secondary);
-  line-height: 1.7;
 }
 
 /* Category pill — used directly in utils.js postCardHTML() */
@@ -619,7 +620,7 @@ button:focus-visible,
   padding: clamp(1rem, 2vw, 1.6rem);
 }
 
-#post-container .post h3:nth-of-type(2) {
+#post-container .post-title {
   font-size: clamp(1.02rem, 2.2vw, 1.2rem);
 }
 
@@ -994,6 +995,86 @@ button:focus-visible,
 }
 .auth-switch:hover {
   text-decoration: underline;
+}
+
+/* Demo quick-login buttons */
+.demo-divider {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  margin: 1.4rem 0 1rem;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  white-space: nowrap;
+}
+.demo-divider::before,
+.demo-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+.demo-users {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.auth-shell button.demo-user {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  width: 100%;
+  margin-top: 0;
+  padding: 0.55rem 0.7rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  text-align: left;
+  box-shadow: none;
+}
+.auth-shell button.demo-user:hover {
+  background: var(--bg-hover);
+  border-color: var(--accent);
+  box-shadow: var(--shadow-focus);
+  transform: translateY(-1px);
+}
+.auth-shell button.demo-user:active {
+  transform: scale(0.97);
+}
+
+.demo-avatar {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--avatar-a), var(--avatar-b));
+  font-size: 0.72rem;
+  font-weight: 800;
+  color: #ffffff;
+  flex-shrink: 0;
+}
+
+.demo-meta {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+.demo-meta strong {
+  font-size: 0.82rem;
+  font-weight: 700;
+  line-height: 1.2;
+}
+.demo-meta small {
+  font-size: 0.68rem;
+  color: var(--text-muted);
 }
 
 /* ============================================================
@@ -1469,30 +1550,38 @@ button:focus-visible,
 .chat-typing-indicator {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   padding: 4px 0.9rem;
   height: 22px;          /* ‼️ Space always reserved so messages don't shift */
-  font-size: 0.72rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  color: var(--text-muted);
-  opacity: 0;            /* Hidden by default; only opacity toggles */
+  color: var(--accent);       /* animated dots pick this up */
+  background: var(--accent-soft);
+  border-radius: var(--radius-sm);
+  opacity: 0;                 /* Hidden by default; only opacity toggles */
   flex-shrink: 0;
   transition: opacity 0.15s var(--ease);
-  pointer-events: none;  /* Never blocks clicks, even when fading through */
+  pointer-events: none;       /* Never blocks clicks, even when fading through */
 }
 
 .chat-typing-indicator.visible {
   opacity: 1;
 }
 
+/* "Sara is typing" label — bright so it reads at a glance */
+.chat-typing-name {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
 .chat-typing-dots {
   display: inline-flex;
-  gap: 3px;
+  gap: 4px;
 }
 
 .chat-typing-dots span {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: currentColor;
   animation: chat-typing-bounce 1.2s infinite ease-in-out;
@@ -1513,7 +1602,7 @@ button:focus-visible,
     transform: translateY(0);
   }
   30% {
-    transform: translateY(-3px);
+    transform: translateY(-4px);
   }
 }
 
@@ -1651,7 +1740,7 @@ button:focus-visible,
     padding: 1rem;
   }
 
-  #post-container .post h3:nth-of-type(2) {
+  #post-container .post-title {
     font-size: 1.02rem;
     line-height: 1.35;
   }
@@ -1717,8 +1806,14 @@ button:focus-visible,
   .nav-username {
     display: none;
   }
+  .demo-users {
+    grid-template-columns: 1fr;
+  }
   .post {
     padding: 1.15rem 1.1rem;
+  }
+  .post-title {
+    font-size: 1.05rem;
   }
 
   #post-container,
@@ -1728,11 +1823,11 @@ button:focus-visible,
     width: calc(100% - 1rem);
   }
 
-  #post-container .post h3:first-of-type {
+  #post-container .post-author {
     font-size: 0.67rem;
   }
 
-  #post-container .post h3:nth-of-type(2) {
+  #post-container .post-title {
     font-size: 0.96rem;
   }
 
