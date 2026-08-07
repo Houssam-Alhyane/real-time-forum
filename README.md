@@ -141,7 +141,7 @@ Requires [Docker](https://www.docker.com/) with Compose.
 docker compose up --build
 ```
 
-Then open [http://localhost:8082](http://localhost:8082) in your browser. No local Go toolchain or C compiler is needed — the app builds inside the container.
+Then open [http://localhost:9070](http://localhost:9070) in your browser (mapped from the container's port `8082`). No local Go toolchain or C compiler is needed — the app builds inside the container.
 
 - The SQLite database persists in the `forum-data` volume across restarts.
 - Stop with `docker compose down`; stop **and reset** the database with `docker compose down -v`.
