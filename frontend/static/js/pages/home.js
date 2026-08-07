@@ -2,6 +2,7 @@ import { renderNavbar } from '../navbar.js';
 import { loadPosts } from '../posts.js';
 import { renderChatUsers, openChatPanel } from '../Chatui.js';
 import { initWebSocket, chatState } from '../ChatData.js';
+import { filterSidebarHTML } from '../utils.js';
 
 async function fetchChatUsers() {
   try {
@@ -17,7 +18,7 @@ async function fetchChatUsers() {
   }
 }
 
-export function renderHome() {
+export function renderHome(initialCategories = []) {
   const app = document.getElementById('app');
   if (location.pathname !== '/') history.pushState({}, '', '/');
 
@@ -25,20 +26,7 @@ export function renderHome() {
     ${renderNavbar()}
     <div class="container">
       <div class="sidebar-col">
-        <aside class="sidebar">
-          <h3>Filter Posts</h3>
-          <div class="filter-group">
-            <h4>By Category</h4>
-            <label><input type="checkbox" value="General"> General</label>
-            <label><input type="checkbox" value="Programming"> Programming</label>
-            <label><input type="checkbox" value="Gaming"> Gaming</label>
-            <label><input type="checkbox" value="Movies"> Movies</label>
-            <label><input type="checkbox" value="Sports"> Sports</label>
-            <label><input type="checkbox" value="Anime"> Anime</label>
-          </div>
-          <button class="clear-btn" data-action="clear-filters">Clear Filters</button>
-        </aside>
-
+        ${filterSidebarHTML()}
       </div>
 
       <main class="content">
@@ -46,6 +34,14 @@ export function renderHome() {
       </main>
 
     </div>`;
+
+  // Pre-apply filters selected elsewhere (e.g. the post page sidebar) so the
+  // feed renders filtered on the first fetch.
+  if (initialCategories.length > 0) {
+    document.querySelectorAll('.sidebar input[type="checkbox"]').forEach((cb) => {
+      cb.checked = initialCategories.includes(cb.value);
+    });
+  }
 
   // Initialize WebSocket connection
   initWebSocket();

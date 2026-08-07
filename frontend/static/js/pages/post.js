@@ -1,4 +1,3 @@
-import { state } from '../state.js';
 import { fetchPostAndComments } from '../comments.js';
 import { renderNavbar } from '../navbar.js';
 import { renderChatUsers, injectChatLayout, openChatPanel } from '../Chatui.js';
@@ -21,7 +20,7 @@ export function renderPostPage(postId) {
   app.innerHTML = `
     ${renderNavbar()}
     <div class="container">
-      <div class="sidebar-col"></div>
+      <div class="sidebar-col"><!-- chat sidebar is injected here; category filters stay on the feed --></div>
       <main class="content">
         <div id="post-back-wrap">
           <button class="btn post-back-btn" data-action="nav" data-target="/">&larr; Back to Posts</button>

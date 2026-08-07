@@ -149,6 +149,8 @@ button:focus-visible,
   color: var(--text-primary);
   cursor: pointer;
   letter-spacing: -0.01em;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: opacity 0.15s var(--ease);
 }
 
@@ -303,6 +305,7 @@ button:focus-visible,
   position: sticky;
   top: 88px;
   align-self: start;
+  min-width: 0;
 }
 
 .sidebar {
@@ -451,6 +454,7 @@ button:focus-visible,
   letter-spacing: -0.01em;
   color: var(--text-primary);
   line-height: 1.35;
+  overflow-wrap: break-word;
 }
 
 /* Post body — inset panel that clearly separates content from the title */
@@ -503,6 +507,7 @@ button:focus-visible,
    ============================================================ */
 .post-reactions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.6rem;
   margin-top: 0.9rem;
   padding-top: 0.9rem;
@@ -586,16 +591,6 @@ button:focus-visible,
 /* ============================================================
    SINGLE POST PAGE + COMMENTS
    ============================================================ */
-#post-back-wrap,
-#post-container,
-#comments-container,
-#comment-form-container,
-#comments-load-more-wrap {
-  width: min(900px, calc(100% - 2.5rem));
-  margin-left: auto;
-  margin-right: auto;
-}
-
 #post-back-wrap {
   padding-top: 1.1rem;
 }
@@ -614,22 +609,6 @@ button:focus-visible,
 
 #post-container {
   padding-top: 1.4rem;
-}
-
-#post-container .post {
-  padding: clamp(1rem, 2vw, 1.6rem);
-}
-
-#post-container .post-title {
-  font-size: clamp(1.02rem, 2.2vw, 1.2rem);
-}
-
-#post-container .post-reactions {
-  flex-wrap: nowrap;
-}
-
-#post-container .react-btn {
-  min-width: 0;
 }
 
 #comments-container {
@@ -678,6 +657,7 @@ button:focus-visible,
 
 .comment-reactions {
   display: flex;
+  flex-wrap: wrap;
   gap: 0.4rem;
   margin-top: 0.6rem;
   padding-top: 0.5rem;
@@ -911,8 +891,7 @@ button:focus-visible,
 .auth-shell {
   width: 100%;
   max-width: 420px;
-  margin-top: 12vh !important;
-  align-self: center;
+  margin: clamp(1.5rem, 12vh, 6rem) auto 0;
   background: var(--bg-surface);
   border: 1px solid var(--border);
   border-radius: var(--radius-lg);
@@ -1020,7 +999,7 @@ button:focus-visible,
 
 .demo-users {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 0.6rem;
 }
 
@@ -1402,7 +1381,7 @@ button:focus-visible,
   position: fixed;
   bottom: 20px;
   right: 20px;
-  width: min(400px, calc(100vw - 40px)); /* Responsive width */
+  width: min(400px, calc(100% - 40px)); /* Responsive width */
   height: 420px; /* Height for approximately 7 visible messages */
   background: var(--bg-surface);
   border: 1px solid var(--border);
@@ -1688,69 +1667,33 @@ button:focus-visible,
     grid-template-columns: minmax(220px, 260px) minmax(0, 1fr);
     max-width: 1000px;
   }
-  .chat-panel-dock.open {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    width: min(400px, calc(100vw - 40px));
-    height: 420px; /* Height for approximately 7 visible messages */
-    z-index: 9999;
-    box-shadow: var(--shadow-lg);
-  }
-}
-
-/* Default styles for larger screens - chat dock has fixed width */
-.chat-panel-dock.open {
-  width: min(400px, calc(100vw - 40px)); /* Same as tablet screens */
 }
 
 @media (max-width: 768px) {
   .chat-panel-dock.open {
-    width: calc(100vw - 20px);
+    width: calc(100% - 20px);
     height: min(460px, calc(100vh - 100px));
     right: 10px;
     left: 10px;
     bottom: 10px;
   }
 
-  /* Single-column layout on small screens regardless of chat state */
+  /* Single-column layout on small screens regardless of chat state.
+     minmax(0, 1fr) is essential: a plain 1fr track cannot shrink below
+     the widest content's min-content size, which widens the whole page
+     and forces the browser to zoom out on phones. */
   .container {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
+
+  /* Keep the natural DOM order: chat sidebar + category filters render
+     above the feed on mobile. */
 
   /* Prevent chat dock from interfering with main page content, and force
      single-column layout on small screens while chat is open */
   .container.chat-open {
     padding-bottom: 480px; /* Make space for chat dock */
-    grid-template-columns: 1fr; /* Force single column layout */
-  }
-
-  #post-container,
-  #comments-container,
-  #comment-form-container,
-  #comments-load-more-wrap {
-    width: calc(100% - 1.5rem);
-  }
-
-  #post-container {
-    padding-top: 1rem;
-  }
-
-  #post-container .post {
-    padding: 1rem;
-  }
-
-  #post-container .post-title {
-    font-size: 1.02rem;
-    line-height: 1.35;
-  }
-
-  #post-container .post p {
-    font-size: 0.88rem;
-  }
-
-  #post-container .post-categories {
-    gap: 5px;
+    grid-template-columns: minmax(0, 1fr); /* Force single column layout */
   }
 
   #comment-form-container {
@@ -1770,15 +1713,16 @@ button:focus-visible,
   }
 
   .sidebar {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.5rem;
+    display: block;
   }
 
-  .sidebar h3 {
-    grid-column: 1 / -1;
-  }
+  /* Compact two-column category filters on mobile */
   .filter-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2px;
+  }
+  .filter-group h4 {
     grid-column: 1 / -1;
   }
   .navbar {
@@ -1786,7 +1730,8 @@ button:focus-visible,
   }
 
   .auth-shell {
-    margin: auto 1rem;
+    margin: 1.5rem auto;
+    width: calc(100% - 2rem);
     padding: 1.75rem 1.5rem;
   }
 
@@ -1795,19 +1740,30 @@ button:focus-visible,
   }
 
   .chat-user-list {
-    max-height: 260px;
+    max-height: 200px;
   }
 }
 
 @media (max-width: 420px) {
   .navbar {
     height: 58px;
+    padding: 0 0.9rem;
+  }
+  .navbar .btn {
+    padding: 0.42rem 0.85rem;
+    font-size: 0.78rem;
+  }
+  .auth-buttons {
+    gap: 6px;
   }
   .nav-username {
     display: none;
   }
   .demo-users {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .sidebar {
+    padding: 1.25rem;
   }
   .post {
     padding: 1.15rem 1.1rem;
@@ -1815,24 +1771,14 @@ button:focus-visible,
   .post-title {
     font-size: 1.05rem;
   }
-
-  #post-container,
-  #comments-container,
-  #comment-form-container,
-  #comments-load-more-wrap {
-    width: calc(100% - 1rem);
+  .post-body {
+    padding: 0.85rem 0.8rem;
   }
-
-  #post-container .post-author {
-    font-size: 0.67rem;
+  .create-post-form {
+    padding: 1.25rem 1rem;
   }
-
-  #post-container .post-title {
-    font-size: 0.96rem;
-  }
-
-  #post-container .post p {
-    font-size: 0.85rem;
+  .error-page {
+    padding: 3rem 1.5rem;
   }
 
   .toast {

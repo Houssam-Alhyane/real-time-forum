@@ -1,4 +1,25 @@
 import { renderReactionBar } from './reactions.js';
+
+// Shared category-filter sidebar, used by both the home feed and the
+// single post page so the two pages keep an identical layout.
+export function filterSidebarHTML() {
+  return `
+    <aside class="sidebar">
+      <h3>Filter Posts</h3>
+      <div class="filter-group">
+        <h4>By Category</h4>
+        <label><input type="checkbox" value="General"> General</label>
+        <label><input type="checkbox" value="Programming"> Programming</label>
+        <label><input type="checkbox" value="Gaming"> Gaming</label>
+        <label><input type="checkbox" value="Movies"> Movies</label>
+        <label><input type="checkbox" value="Sports"> Sports</label>
+        <label><input type="checkbox" value="Anime"> Anime</label>
+      </div>
+      <button class="clear-btn" data-action="clear-filters">Clear Filters</button>
+    </aside>
+  `;
+}
+
 export function postCardHTML(p, options = {}) {
   const categoriesHtml = (p.categories || [])
     .map((c) => `<span class="category-tag">${escapeHTML(c)}</span>`)

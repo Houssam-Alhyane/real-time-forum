@@ -1,4 +1,5 @@
 import { router, navigateTo } from './router.js';
+import { renderHome } from './pages/home.js';
 import {
   loadPosts,
   loadMorePosts,
@@ -73,6 +74,12 @@ export function initAppEvents() {
         break;
       }
       case 'clear-filters': {
+        // Safety net: if the filter sidebar somehow renders on a page
+        // without the feed, the clear button returns to the feed instead.
+        if (!document.getElementById('posts-container')) {
+          navigateTo('/');
+          break;
+        }
         clearFilters();
         break;
       }
@@ -129,6 +136,16 @@ export function initAppEvents() {
   document.body.addEventListener('change', (e) => {
     const el = e.target;
     if (el && el.matches('.sidebar input[type="checkbox"]')) {
+      // Safety net: if filter checkboxes ever render on a page without the
+      // feed, applying one returns to the home feed with the selection kept.
+      if (!document.getElementById('posts-container') && location.pathname !== '/') {
+        const checked = Array.from(
+          document.querySelectorAll('.sidebar input[type="checkbox"]:checked'),
+        ).map((cb) => cb.value);
+
+        renderHome(checked);
+        return;
+      }
       filterPosts();
     }
   });

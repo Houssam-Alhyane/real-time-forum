@@ -17,7 +17,7 @@
 
 A forum application rewritten as a **single-page application (SPA)**: one HTML file, with every page transition (login, register, feed, post view) handled entirely in JavaScript on the client, talking to a Go backend over HTTP and WebSockets.
 
-The backend is built with the Go standard library, SQLite for persistence, and WebSockets for real-time features. The frontend is written in **vanilla JavaScript** — no React, Vue, or any other framework — with hand-rolled routing, DOM rendering, and state management. Built as a learning project covering real-time communication, session management, and full-stack development from scratch.
+The backend is built with the Go standard library, SQLite for persistence, and WebSockets for real-time features. The frontend is written in **vanilla JavaScript** — no React, Vue, or any other framework — with hand-rolled routing, DOM rendering, state management, and a fully responsive stylesheet. Built as a learning project covering real-time communication, session management, and full-stack development from scratch.
 
 ## ✨ Features
 
@@ -44,6 +44,10 @@ The backend is built with the Go standard library, SQLite for persistence, and W
 - **Typing indicators** broadcast to the receiver while you type.
 - New messages and presence changes are pushed instantly over WebSockets — no page refresh.
 - **Multi-tab support**: a user can be connected from several tabs; presence flips to offline only when the *last* tab disconnects.
+
+### 📱 Responsiveness & Pagination
+
+Clean, zoom-safe layout from desktop down to small phones, with posts, comments, and chat history loading incrementally.
 
 ### 🛡️ Backend Protections
 
@@ -177,7 +181,7 @@ Then open [http://localhost:9070](http://localhost:9070) in your browser (mapped
 
 This project covers:
 
-- HTML, HTTP, sessions & cookies, CSS
+- HTML, HTTP, sessions & cookies, CSS & responsive design
 - Backend/Frontend separation and the DOM
 - Go **goroutines and mutexes** for concurrency
 - WebSockets, both server-side (Go) and client-side (JS)
