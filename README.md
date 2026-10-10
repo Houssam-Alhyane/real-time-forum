@@ -150,6 +150,16 @@ Then open [http://localhost:9070](http://localhost:9070) in your browser (mapped
 - The SQLite database persists in the `forum-data` volume across restarts.
 - Stop with `docker compose down`; stop **and reset** the database with `docker compose down -v`.
 
+#### ARM64 image
+
+An ARM64 build is published separately at [`elmehdirezoug/real-time-forum-arm`](https://hub.docker.com/r/elmehdirezoug/real-time-forum-arm):
+
+```bash
+docker pull elmehdirezoug/real-time-forum-arm:latest
+```
+
+Use it on ARM hosts (Apple Silicon, Raspberry Pi, ARM servers) by pointing the `image` in [`docker-compose.yml`](docker-compose.yml) at `elmehdirezoug/real-time-forum-arm:latest`.
+
 ## 🗂️ Project Structure
 
 ```
