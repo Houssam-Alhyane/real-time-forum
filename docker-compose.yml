@@ -7,7 +7,7 @@ services:
       dockerfile: Dockerfile
     container_name: real-time-forum
     ports:
-      - "9070:8082"   # host:container
+      - "8084:8082"   # host:container
     volumes:
       - forum-data:/app/backend/database
     restart: always
